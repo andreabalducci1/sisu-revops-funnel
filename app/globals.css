@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+/*
+  SiSu RevOps Funnel — design system
+  Warm, editorial, light theme. SiSu RevOps brand tokens.
+  Colors mirror config.ts > brand. Fonts: DM Serif Display + DM Sans.
+  No pure white, no pure black, no drop shadows, no em dashes.
+*/
+
+:root {
+  /* Colors (mirror config.ts > brand) */
+  --color-primary: #1c1c1c;       /* Deep Charcoal — primary button */
+  --color-primary-dark: #2a2a2a;  /* button hover */
+  --color-primary-light: #e3dcd0; /* Sand — soft fills */
+  --color-accent: #7e8f83;        /* Muted Sage — calm accent, checkmarks */
+  --color-eyebrow: #5a88b8;       /* Dusty Blue-Grey — eyebrows */
+  --color-link: #5a88b8;          /* Dusty Blue-Grey — prose links */
+  --color-bg: #f4f1ec;            /* Warm Ivory */
+  --color-bg-soft: #e9e3d8;       /* soft sand */
+  --color-surface: #f8f6f1;       /* Card — slight lift, never pure white */
+  --color-ink: #1c1c1c;           /* Deep Charcoal */
+  --color-ink-soft: #474747;      /* muted foreground */
+  --color-line: #ddd6cb;          /* hairline border */
+
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, -apple-system, sans-serif;
+
+  --radius: 8px;                  /* SiSu 0.5rem */
+  --shadow-card: none;            /* SiSu: no drop shadows */
+  --shadow-lift: none;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-bg: var(--color-bg);
+  --color-ink: var(--color-ink);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400; /* DM Serif Display has no bold; italic does emphasis */
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-ink);
+}
+
+/* Italic counter-line in two-line headlines (SiSu pattern) */
+.headline-counter {
+  font-style: italic;
+  color: var(--color-ink);
+}
+
+/* ── Composition helpers ──────────────────────────────── */
+
+.container-tight {
+  width: 100%;
+  max-width: 68.75rem; /* 1100px — SiSu container */
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-eyebrow);
+}
+
+/* Card surface — matte, paper-like, flat (no shadow) */
+.surface-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+/* Primary button — charcoal on ivory (SiSu inverted), rounded-md, no pill */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--color-primary);
+  color: var(--color-bg);
+  font-weight: 500;
+  padding: 0.85rem 1.6rem;
+  border-radius: var(--radius);
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+}
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Secondary button — outline */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  color: var(--color-ink);
+  font-weight: 500;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-ink);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.btn-outline:hover {
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+
+/* Animated underline link */
+.link-underline {
+  position: relative;
+  color: var(--color-link);
+  font-weight: 500;
+  text-decoration: none;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.link-underline:hover::after {
+  transform: scaleX(1);
+}
+
+/* ── Animation: one signature reveal-up on load ── */
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reveal {
+  opacity: 0;
+  animation: reveal-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.reveal-1 { animation-delay: 0.05s; }
+.reveal-2 { animation-delay: 0.16s; }
+.reveal-3 { animation-delay: 0.27s; }
+.reveal-4 { animation-delay: 0.38s; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { animation: none; opacity: 1; }
+  html { scroll-behavior: auto; }
+}
+
+/* Funnel grid: landing 2 columns -> 1 column */
+.funnel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 3.5rem;
+  align-items: center;
+}
+@media (max-width: 860px) {
+  .funnel-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .funnel-grid aside {
+    order: -1;
+  }
+}
+
+/* Positioning context for decorative background shapes */
+.paper-grain {
+  position: relative;
+}
