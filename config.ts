@@ -1,5 +1,5 @@
 /**
- * SiSu RevOps Funnel — central configuration (SINGLE SOURCE OF TRUTH)
+ * SiSu RevOps Funnel - central configuration (SINGLE SOURCE OF TRUTH)
  *
  * Every page reads this file. To customize the funnel, edit values here
  * (copy, colors, links). Pages contain no hardcoded text or color.
@@ -168,8 +168,8 @@ const config = {
     headline: "Book your call",
     description:
       "Pick a time that works. We will look at your score together and map the fastest wins.",
-    calUsername: "", // e.g. "andrea-balducci"
-    calEventSlug: "", // e.g. "revops-call"
+    calUsername: "balducci", // Cal.com handle
+    calEventSlug: "25-min-chat-linkedin", // 25-min chat event
   },
 
   // Step 4: Thanks.

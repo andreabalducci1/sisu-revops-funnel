@@ -1,5 +1,5 @@
 /**
- * Resend — sends the personalized maturity report by email.
+ * Resend - sends the personalized maturity report by email.
  *
  * If RESEND_API_KEY / RESEND_FROM_EMAIL are not set, isResendConfigured()
  * returns false and sending is skipped (demo mode). Add the keys in .env to

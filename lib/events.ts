@@ -1,5 +1,5 @@
 /**
- * PostHog funnel event names — single source of truth.
+ * PostHog funnel event names - single source of truth.
  * Used on the client (tracking) and server (admin / funnel stats).
  */
 export const FUNNEL_EVENTS = {

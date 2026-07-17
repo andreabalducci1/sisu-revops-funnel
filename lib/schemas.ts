@@ -33,7 +33,7 @@ const utmFields = {
   utmCampaign: z.string().max(255).optional(),
 };
 
-/** Schéma de l'opt-in (étape 1 du tunnel). Email + prénom optionnel + UTM. */
+/** Opt-in schema (funnel step 1). Email + optional first name + UTM. */
 export const optinSchema = z.object({
   email: emailField,
   firstName: z

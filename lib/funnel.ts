@@ -1,5 +1,5 @@
 /**
- * Cookies de progression du funnel — utilisés pour le gating des étapes
+ * Funnel progression cookies - used for gating the steps.
  * (voir middleware.ts) et pour éviter de re-demander l'email.
  */
 

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  SiSu RevOps Funnel — design system
+  SiSu RevOps Funnel - design system
   Warm, editorial, light theme. SiSu RevOps brand tokens.
   Colors mirror config.ts > brand. Fonts: DM Serif Display + DM Sans.
   No pure white, no pure black, no drop shadows, no em dashes.
@@ -9,15 +9,15 @@
 
 :root {
   /* Colors (mirror config.ts > brand) */
-  --color-primary: #1c1c1c;       /* Deep Charcoal — primary button */
+  --color-primary: #1c1c1c;       /* Deep Charcoal - primary button */
   --color-primary-dark: #2a2a2a;  /* button hover */
-  --color-primary-light: #e3dcd0; /* Sand — soft fills */
-  --color-accent: #7e8f83;        /* Muted Sage — calm accent, checkmarks */
-  --color-eyebrow: #5a88b8;       /* Dusty Blue-Grey — eyebrows */
-  --color-link: #5a88b8;          /* Dusty Blue-Grey — prose links */
+  --color-primary-light: #e3dcd0; /* Sand - soft fills */
+  --color-accent: #7e8f83;        /* Muted Sage - calm accent, checkmarks */
+  --color-eyebrow: #5a88b8;       /* Dusty Blue-Grey - eyebrows */
+  --color-link: #5a88b8;          /* Dusty Blue-Grey - prose links */
   --color-bg: #f4f1ec;            /* Warm Ivory */
   --color-bg-soft: #e9e3d8;       /* soft sand */
-  --color-surface: #f8f6f1;       /* Card — slight lift, never pure white */
+  --color-surface: #f8f6f1;       /* Card - slight lift, never pure white */
   --color-ink: #1c1c1c;           /* Deep Charcoal */
   --color-ink-soft: #474747;      /* muted foreground */
   --color-line: #ddd6cb;          /* hairline border */
@@ -74,7 +74,7 @@ h1, h2, h3, h4 {
 
 .container-tight {
   width: 100%;
-  max-width: 68.75rem; /* 1100px — SiSu container */
+  max-width: 68.75rem; /* 1100px - SiSu container */
   margin: 0 auto;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -91,7 +91,7 @@ h1, h2, h3, h4 {
   color: var(--color-eyebrow);
 }
 
-/* Card surface — matte, paper-like, flat (no shadow) */
+/* Card surface - matte, paper-like, flat (no shadow) */
 .surface-card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
@@ -99,7 +99,7 @@ h1, h2, h3, h4 {
   box-shadow: var(--shadow-card);
 }
 
-/* Primary button — charcoal on ivory (SiSu inverted), rounded-md, no pill */
+/* Primary button - charcoal on ivory (SiSu inverted), rounded-md, no pill */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -122,7 +122,7 @@ h1, h2, h3, h4 {
   cursor: not-allowed;
 }
 
-/* Secondary button — outline */
+/* Secondary button - outline */
 .btn-outline {
   display: inline-flex;
   align-items: center;

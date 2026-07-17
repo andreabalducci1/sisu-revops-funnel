@@ -1,5 +1,5 @@
 /**
- * Anthropic (Claude) — writes the qualitative maturity report.
+ * Anthropic (Claude) - writes the qualitative maturity report.
  *
  * Uses the official SDK (per Anthropic's own guidance) with structured outputs
  * (output_config.format = json_schema) so the model returns valid JSON, which

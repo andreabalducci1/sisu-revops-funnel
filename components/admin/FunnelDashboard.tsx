@@ -67,7 +67,7 @@ export function FunnelDashboard() {
           }}
         />
         <button type="submit" className="btn-primary">
-          Accéder au dashboard
+          Access dashboard
         </button>
       </form>
     );
@@ -78,7 +78,7 @@ export function FunnelDashboard() {
   return (
     <div style={{ display: "grid", gap: "1.6rem" }}>
       <div style={{ display: "flex", gap: "0.6rem", alignItems: "center", flexWrap: "wrap" }}>
-        <span style={{ fontSize: "0.85rem", color: "var(--color-ink-soft)" }}>Période :</span>
+        <span style={{ fontSize: "0.85rem", color: "var(--color-ink-soft)" }}>Period:</span>
         {[7, 30, 90].map((d) => (
           <button
             key={d}
@@ -87,12 +87,12 @@ export function FunnelDashboard() {
             className={d === days ? "btn-primary" : "btn-outline"}
             style={{ padding: "0.4rem 1rem", fontSize: "0.85rem" }}
           >
-            {d} jours
+            {d} days
           </button>
         ))}
       </div>
 
-      {loading && <p style={{ color: "var(--color-ink-soft)" }}>Chargement…</p>}
+      {loading && <p style={{ color: "var(--color-ink-soft)" }}>Loading…</p>}
       {error && (
         <div className="surface-card" style={{ padding: "1.4rem", color: "#b91c1c" }}>
           {error}

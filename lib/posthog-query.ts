@@ -45,7 +45,7 @@ async function queryHogQL(sql: string): Promise<HogQLResult> {
   return json;
 }
 
-/** Compte les occurrences d'un event sur les `days` derniers jours. */
+/** Counts occurrences of an event over the last `days` days. */
 export async function countEvent(eventName: string, days: number): Promise<number> {
   const safeEvent = eventName.replace(/'/g, "''");
   const sql = `

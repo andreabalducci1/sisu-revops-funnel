@@ -2,7 +2,7 @@ import config from "@/config";
 import { FunnelDashboard } from "@/components/admin/FunnelDashboard";
 
 export const metadata = {
-  title: "Admin — Funnel",
+  title: "Admin: Funnel",
   robots: { index: false, follow: false },
 };
 
@@ -15,10 +15,10 @@ export default function AdminPage() {
       >
         <span className="eyebrow">Dashboard</span>
         <h1 style={{ fontSize: "2.2rem", margin: "0.8rem 0 0.4rem" }}>
-          Funnel — {config.business.name}
+          Funnel: {config.business.name}
         </h1>
         <p style={{ color: "var(--color-ink-soft)", marginBottom: "2.4rem" }}>
-          Taux de conversion par étape, depuis PostHog.
+          Step-by-step conversion rates, from PostHog.
         </p>
 
         <FunnelDashboard />

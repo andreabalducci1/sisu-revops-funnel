@@ -1,4 +1,4 @@
-# SiSu RevOps Funnel — Claude Code brain
+# SiSu RevOps Funnel - Claude Code brain
 
 ## What this is
 

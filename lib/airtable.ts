@@ -1,5 +1,5 @@
 /**
- * Airtable — the funnel's lead CRM.
+ * Airtable - the funnel's lead CRM.
  *
  * If the env vars are not set, isAirtableConfigured() returns false and the
  * funnel runs in demo mode (the lead is logged, not stored). Add the Airtable
