@@ -25,13 +25,14 @@ function headers() {
   };
 }
 
-interface AirtableRecord {
+export interface AirtableRecord {
   id: string;
   fields: Record<string, unknown>;
 }
 
 interface AirtableResponse {
   records: AirtableRecord[];
+  offset?: string;
 }
 
 export interface LeadFields {
@@ -71,6 +72,48 @@ export async function findLeadByEmail(
 
   const data: AirtableResponse = await res.json();
   return data.records[0] || null;
+}
+
+/**
+ * Lists every lead, following Airtable's `offset` cursor to the end.
+ *
+ * Pages are fetched sequentially on purpose: Airtable allows 5 requests per
+ * second per base and this module has no rate-limit handling, so parallel
+ * bursts would risk 429s. Pass `fields` to project only the columns you need
+ * (the Report column holds a full JSON report and is large).
+ *
+ * `maxPages` is a safety stop so a huge base cannot hang a request forever.
+ */
+export async function listLeads(
+  fields?: string[],
+  maxPages = 20
+): Promise<AirtableRecord[]> {
+  const records: AirtableRecord[] = [];
+  let offset: string | undefined;
+  let page = 0;
+
+  do {
+    const params = new URLSearchParams({ pageSize: "100" });
+    if (offset) params.set("offset", offset);
+    for (const field of fields ?? []) params.append("fields[]", field);
+
+    const res = await fetch(`${BASE_URL}?${params.toString()}`, {
+      headers: headers(),
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("[Airtable] listLeads failed", { status: res.status, body: text });
+      throw new Error(`Airtable listLeads failed: ${res.status}`);
+    }
+
+    const data: AirtableResponse = await res.json();
+    records.push(...data.records);
+    offset = data.offset;
+    page += 1;
+  } while (offset && page < maxPages);
+
+  return records;
 }
 
 export async function getLeadById(recordId: string): Promise<AirtableRecord | null> {

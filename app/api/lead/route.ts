@@ -69,9 +69,15 @@ export async function POST(req: NextRequest) {
 
     const existing = await findLeadByEmail(email);
     if (existing) {
+      // Only seed Statut when the lead has none yet. Writing "optin"
+      // unconditionally reset later stages (booking, client) whenever someone
+      // retook the quiz with the same email.
+      const currentStatut = existing.fields?.["Statut"];
+      const hasStatut = typeof currentStatut === "string" && currentStatut !== "";
+
       const updated = await updateLead(existing.id, {
         ...(firstName && { Prenom: firstName }),
-        Statut: "optin",
+        ...(hasStatut ? {} : { Statut: "optin" }),
         ...extra,
       });
       return success({ id: updated.id });

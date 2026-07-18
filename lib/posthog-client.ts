@@ -23,8 +23,18 @@ export function initPostHog(): void {
   initialized = true;
 }
 
-/** Capture un event du funnel. No-op si PostHog n'est pas configuré (mode démo). */
+/**
+ * Capture a funnel event. No-op when PostHog is not configured (demo mode).
+ *
+ * Calls initPostHog() first on purpose. React runs effects bottom-up, so a
+ * child's mount effect (PageView -> track) fires BEFORE the PostHogProvider
+ * parent's effect that used to be the only initializer. posthog-js drops
+ * captures made before init() instead of queueing them, which silently lost
+ * landing_view on every cold page load in production. initPostHog() is
+ * idempotent, so this is cheap.
+ */
 export function track(event: FunnelEvent, props?: Record<string, unknown>): void {
   if (!POSTHOG_KEY || typeof window === "undefined") return;
+  initPostHog();
   posthog.capture(event, props);
 }

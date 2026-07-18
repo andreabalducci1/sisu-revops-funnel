@@ -8,16 +8,27 @@ interface Step {
   count: number;
 }
 
+type Source = "posthog" | "airtable" | "none";
+
+/** Explains which backend answered, so a 3-step funnel is never mistaken for a broken 7-step one. */
+const SOURCE_NOTE: Record<Source, string> = {
+  posthog: "Full funnel, from PostHog.",
+  airtable:
+    "From Airtable. Shows the stages after the email gate only. Add a PostHog key for landing, quiz and booking steps.",
+  none: "No analytics source configured. Add Airtable or PostHog keys.",
+};
+
 export function FunnelDashboard() {
   const [secret, setSecret] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [days, setDays] = useState(30);
   const [steps, setSteps] = useState<Step[] | null>(null);
+  const [source, setSource] = useState<Source | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Pré-remplit le secret depuis l'URL (?secret=...) pour un accès direct.
+    // Prefills the secret from the URL (?secret=...) for direct access.
     const fromUrl = new URLSearchParams(window.location.search).get("secret");
     if (fromUrl) {
       setSecret(fromUrl);
@@ -33,10 +44,12 @@ export function FunnelDashboard() {
       .then((r) => r.json())
       .then((json) => {
         if (!json.ok) {
-          setError(json.error?.message || "Erreur");
+          setError(json.error?.message || "Something went wrong");
           setSteps(null);
+          setSource(null);
         } else {
           setSteps(json.data.steps);
+          setSource(json.data.source ?? null);
         }
       })
       .catch(() => setError("Could not connect"))
@@ -73,7 +86,9 @@ export function FunnelDashboard() {
     );
   }
 
-  const top = steps?.[0]?.count || 0;
+  // Scale bars to the largest step, not the first one. Using steps[0] rendered
+  // every bar at 0% width whenever the top-of-funnel step happened to be 0.
+  const top = steps?.length ? Math.max(...steps.map((s) => s.count)) : 0;
 
   return (
     <div style={{ display: "grid", gap: "1.6rem" }}>
@@ -91,6 +106,12 @@ export function FunnelDashboard() {
           </button>
         ))}
       </div>
+
+      {source && !loading && !error && (
+        <p style={{ fontSize: "0.85rem", color: "var(--color-ink-soft)", margin: 0 }}>
+          {SOURCE_NOTE[source]}
+        </p>
+      )}
 
       {loading && <p style={{ color: "var(--color-ink-soft)" }}>Loading…</p>}
       {error && (
@@ -110,7 +131,7 @@ export function FunnelDashboard() {
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.6rem" }}>
                   <span style={{ fontWeight: 600 }}>{step.label}</span>
                   <span style={{ fontFamily: "var(--font-display)", fontSize: "1.3rem" }}>
-                    {step.count.toLocaleString("fr-FR")}
+                    {step.count.toLocaleString("en-US")}
                     {conv !== null && (
                       <span style={{ fontSize: "0.8rem", color: "var(--color-accent)", marginLeft: 8 }}>
                         {conv}%

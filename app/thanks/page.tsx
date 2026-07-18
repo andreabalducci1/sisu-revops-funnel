@@ -8,7 +8,7 @@ export default function ThanksPage() {
 
   return (
     <main className="paper-grain" style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
-      <PageView event={FUNNEL_EVENTS.BOOKING_COMPLETED} />
+      <PageView event={FUNNEL_EVENTS.THANKS_VIEW} />
 
       <section
         className="container-tight"

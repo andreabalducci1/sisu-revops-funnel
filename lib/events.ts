@@ -14,7 +14,10 @@ export const FUNNEL_EVENTS = {
   RESOURCE_ENGAGED: "resource_engaged",
   BOOKING_CLICK: "booking_click",
   BOOKING_VIEW: "booking_view",
+  /** Fired once by the Cal.com callback in CalEmbed. This is the authoritative booking signal. */
   BOOKING_COMPLETED: "booking_completed",
+  /** Page view of /thanks. Kept separate so refreshes do not inflate BOOKING_COMPLETED. */
+  THANKS_VIEW: "thanks_view",
 } as const;
 
 export type FunnelEvent = (typeof FUNNEL_EVENTS)[keyof typeof FUNNEL_EVENTS];
