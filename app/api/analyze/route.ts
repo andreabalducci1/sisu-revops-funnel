@@ -10,6 +10,31 @@ import config from "@/config";
 
 const RATE_LIMIT = { limit: 5, windowSeconds: 60 };
 
+/** Stable key for a set of answers, independent of property order. */
+function answersKey(answers: Record<string, string>): string {
+  return Object.keys(answers)
+    .sort()
+    .map((id) => `${id}=${answers[id]}`)
+    .join("&");
+}
+
+/**
+ * Stored report payloads carry the answers that produced them. Rows written
+ * before that hold a bare Report, so their answers are unknown and the report
+ * has to be regenerated once before it can be trusted again.
+ */
+function parseStoredReport(raw: string): { report: Report; answersKey?: string } | null {
+  try {
+    const value = JSON.parse(raw);
+    if (value && typeof value === "object" && "report" in value) {
+      return value as { report: Report; answersKey?: string };
+    }
+    return { report: value as Report };
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req.headers);
@@ -26,15 +51,17 @@ export async function POST(req: NextRequest) {
     // Recompute the score server-side. Never trust a client number.
     const score = scoreQuiz(answers, config.quiz);
 
-    // Idempotency: if this lead already has a report, return it. No LLM call, no email.
+    // Idempotency: reuse the stored report only when the same answers produced
+    // it. Returning any cached report next to a freshly recomputed score made a
+    // retake render this run's numbers with the previous run's narrative.
+    const key = answersKey(answers);
     if (isAirtableConfigured() && leadId) {
       const existing = await getLeadById(leadId);
       const stored = existing?.fields?.["Report"];
       if (typeof stored === "string" && stored.length > 0) {
-        try {
-          return success({ report: JSON.parse(stored) as Report, score, cached: true });
-        } catch {
-          // corrupt stored value -> fall through and regenerate
+        const parsed = parseStoredReport(stored);
+        if (parsed && parsed.answersKey === key) {
+          return success({ report: parsed.report, score, cached: true });
         }
       }
     }
@@ -48,7 +75,7 @@ export async function POST(req: NextRequest) {
           const lead = await getLeadById(leadId);
           const alreadyEmailed = Boolean(lead?.fields?.["Report Emailed At"]);
           const update: Record<string, unknown> = {
-            Report: JSON.stringify(report),
+            Report: JSON.stringify({ report, answersKey: key }),
             "Report Generated At": new Date().toISOString(),
           };
           if (isResendConfigured() && !alreadyEmailed) {
