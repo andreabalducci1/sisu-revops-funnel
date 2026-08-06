@@ -1,5 +1,6 @@
 import { MaturityQuiz } from "@/components/funnel/MaturityQuiz";
 import { PageView } from "@/components/funnel/PageView";
+import { BackToSite } from "@/components/funnel/BackToSite";
 import { FUNNEL_EVENTS } from "@/lib/events";
 
 export default function LandingPage() {
@@ -25,6 +26,8 @@ export default function LandingPage() {
           pointerEvents: "none",
         }}
       />
+
+      <BackToSite />
 
       <MaturityQuiz />
     </main>

@@ -14,6 +14,9 @@ const config = {
     name: "SiSu RevOps",
     tagline: "Fractional RevOps and AI, wired into your revenue engine.",
     domain: "sisurevops.com",
+    /** Main site. The funnel is a separate app, so it needs an explicit way back. */
+    siteUrl: "https://www.sisurevops.com",
+    backLabel: "Back to sisurevops.com",
   },
 
   brand: {
