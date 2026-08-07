@@ -1534,4 +1534,4 @@ git commit -m "Update the project brain for the ungated 12-question quiz"
 - [ ] In a private window: complete the quiz with numbers, then again skipping them. Both reach `/report` with no email requested, and the two reports differ.
 - [ ] Load `/report` directly with no cookies. It shows the empty state and does not redirect.
 - [ ] Confirm no `verified: false` benchmark is being rendered on a public page. If any remain, report it rather than shipping it.
-- [ ] `grep -rn "$(printf '—')" config.ts lib components app CLAUDE.md` returns nothing. (Written as a codepoint so this check does not match itself.)
+- [ ] `grep -rnP '\x{2014}' config.ts lib components app CLAUDE.md` returns nothing. (Escaped as a codepoint so this check does not match itself.)
