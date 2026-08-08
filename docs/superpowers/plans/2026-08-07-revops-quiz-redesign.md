@@ -99,6 +99,17 @@ test("lead-to-opp rate improves monotonically as response gets faster", () => {
 test("unknown bucket returns the slowest rate, never a guess upward", () => {
   assert.equal(leadToOppRate("unknown"), leadToOppRate(RESPONSE_BUCKETS[0].id));
 });
+
+test("no unreplaced placeholder survives into a shipped benchmark", () => {
+  // The scaffold below ships with REPLACE_WITH_* markers on purpose. This test
+  // is the thing that stops them reaching a public page, so it must fail until
+  // Step 1's verification has actually been done.
+  for (const [key, b] of Object.entries(BENCHMARKS)) {
+    assert.ok(!/REPLACE_WITH/.test(b.source), `${key} still has a placeholder source`);
+    assert.ok(!/REPLACE_WITH/.test(b.url), `${key} still has a placeholder url`);
+    assert.equal(b.verified, true, `${key} is not verified`);
+  }
+});
 ```
 
 - [ ] **Step 3: Run test to verify it fails**
@@ -1320,6 +1331,43 @@ export const config = {
 - [ ] **Step 2: Make `leadId` optional in `app/api/analyze/route.ts`**
 
 The Airtable persist and email block is already wrapped in `if (isAirtableConfigured() && leadId)`, so it degrades correctly. Confirm the idempotency lookup is also guarded by `leadId` and that `answersKey` is still computed and stored. Add `numbers` and `cohort` to the destructured payload and pass them through to `generateReport` alongside the precomputed `leak`, `contradictions` and `fixes`.
+
+**The response must return the precomputed values, not just the report.** Task 9 stashes `json.data.leak`, `json.data.contradictions` and `json.data.fixes`, so both success paths (fresh and cached) return exactly:
+
+```ts
+return success({
+  report,
+  score,
+  leak,             // LeakResult | null
+  contradictions,   // Contradiction[]
+  fixes,            // RankedFix[]
+  cached: false,    // true on the idempotent path
+});
+```
+
+Compute `leak`, `contradictions` and `fixes` from the server-recomputed score BEFORE the idempotency check, so the cached path returns them too. They are cheap, pure and deterministic, so recomputing on a cache hit costs nothing and avoids storing them.
+
+- [ ] **Step 2b: Fix a live bug in `app/api/report/route.ts`**
+
+This route does `JSON.parse(stored) as Report`, but since commit `951d224` the stored value is the envelope `{ report, answersKey }`. The hard-refresh fallback therefore hands the viewer the wrapper instead of a report, and the page renders empty. **This is broken in production right now**, independently of this redesign.
+
+Unwrap defensively, accepting both shapes:
+
+```ts
+    const parsed = JSON.parse(stored) as unknown;
+    const report =
+      parsed && typeof parsed === "object" && "report" in parsed
+        ? (parsed as { report: Report }).report
+        : (parsed as Report);
+    // Pre-v2 rows have no version and cannot render in the new viewer.
+    if (report?.version !== 2) return errors.notFound("No stored report");
+```
+
+Also add the missing sixth dimension to `DIM_FIELD`, or the AI score silently reads as 0 on this path:
+
+```ts
+  ai: "Score AI Readiness",
+```
 
 - [ ] **Step 3: Make `app/api/lead/route.ts` an optional capture**
 
