@@ -86,6 +86,38 @@ test("unknown scores zero and is counted", () => {
   assert.equal(r.dimensions[0].unknownCount, 1);
 });
 
+test("a zero-scoring option is not counted as unknown", () => {
+  const q: QuizModel = {
+    dimensions: [{ id: "a", label: "A", weight: 1 }],
+    questions: [
+      {
+        id: "q1",
+        dimension: "a",
+        options: [
+          { id: "good", score: 100 },
+          { id: "bad", score: 0 },
+        ],
+      },
+      {
+        id: "q2",
+        dimension: "a",
+        options: [
+          { id: "good", score: 100 },
+          { id: "unsure", score: 0, unknown: true },
+        ],
+      },
+    ],
+    bands: [
+      { min: 0, max: 49, label: "Low", teaser: "low" },
+      { min: 50, max: 100, label: "High", teaser: "high" },
+    ],
+  };
+  const r = scoreQuiz({ q1: "bad", q2: "unsure" }, q);
+  assert.equal(r.overall, 0);
+  assert.equal(r.unknownCount, 1);
+  assert.equal(r.dimensions[0].unknownCount, 1);
+});
+
 test("weights need not be fractions and are normalised", () => {
   const q: QuizModel = {
     dimensions: [

@@ -9,7 +9,7 @@
 export interface QuizOption {
   id: string;
   score: number;
-  /** Marks a "Not sure" style answer. Scores 0 but is reported as unmeasured. */
+  /** Marks a "Not sure" style answer. Counted separately as unmeasured rather than bad. Typically scores 0 by config convention. */
   unknown?: boolean;
 }
 export interface QuizQuestion {
