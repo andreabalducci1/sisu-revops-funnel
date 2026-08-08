@@ -7,7 +7,8 @@
  * marked verified:false and its dependent leak line is omitted rather than
  * estimated (see the leak model in a later task).
  *
- * Verification record (2026-08-08), one entry per Step 1 claim:
+ * Verification record (2026-08-08, updated same day per owner review), one
+ * entry per Step 1 claim:
  *
  * 1. Lead-to-opportunity conversion, sub-5-minute vs over-1-hour response.
  *    Primary source: James B. Oldroyd, Kristina McElheran, David Elkington,
@@ -21,43 +22,46 @@
  *    full text is paywalled, so the exact multiples (widely reported
  *    secondhand as roughly 21x qualification, 100x contact, for 5 minutes vs
  *    30 minutes) could not be confirmed directly against the original tables.
- *    Not shipped as a dated BENCHMARKS entry (it predates this file's 2023
- *    freshness bar, see claim 2 below). It informs RESPONSE_BUCKETS.leadToOpp
- *    only, and only directionally: the spread actually coded there (5 points,
- *    0.08 to 0.13) is deliberately far more modest than the study's headline
- *    multiples, because this number is multiplied by other user inputs later
- *    and errors compound. Cross-checked for continued relevance against three
- *    2023+ vendor studies: RevenueHero 2024 (1,000 B2B SaaS companies tested),
+ *    Not shipped as its own dated BENCHMARKS entry (it is the same source as
+ *    claim 2, which is). It informs RESPONSE_BUCKETS.leadToOpp only, and only
+ *    directionally: the spread actually coded there (5 points, 0.08 to 0.13)
+ *    is deliberately far more modest than the study's headline multiples,
+ *    because this number is multiplied by other user inputs later and errors
+ *    compound. Cross-checked for continued relevance against three 2023+
+ *    vendor studies: RevenueHero 2024 (1,000 B2B SaaS companies tested),
  *    Chili Piper's 2025 benchmark report (4M form submissions), and Blazeo's
  *    2026 Speed-to-Lead Benchmark Report (573 companies). All three treat "5
  *    minutes" as the live industry reference point and confirm response speed
  *    still predicts conversion in 2024-2026, but none republishes a bucketed
  *    conversion table rigorous enough to replace the 2011 study as the
- *    number's source.
+ *    number's source, which is exactly why the 2011 study is cited directly
+ *    below instead of one of them.
  *
- * 2. The 5-minute speed-to-lead threshold itself.
- *    Same source as claim 1. Genuinely verified as real and as the origin of
- *    the "5 minutes" figure. NOT marked verified:true below, because it is a
- *    2011 source and this file's own test requires year >= 2023 for anything
- *    shipped as a dated BENCHMARKS entry. No 2023+ primary source was found
- *    that independently re-establishes the 5-minute mark with comparable
- *    rigor; recent vendor reports (see claim 1) cite it as received wisdom
- *    rather than re-deriving it from their own data. Rather than backdate a
- *    fresher year onto a 2011 study, BENCHMARKS.speedToLead ships with the
- *    real 2011 citation and verified:false. This is a recency failure, not an
- *    accuracy failure: the number is real, just older than this file allows.
+ * 2. The 5-minute speed-to-lead threshold itself (BENCHMARKS.speedToLead).
+ *    Same source as claim 1. VERIFIED and shipped with its real 2011 date.
+ *    A prior pass in this file withheld verified:true because a blanket
+ *    "year >= 2023" test rule rejected any source older than three years,
+ *    including the seminal study that originated this exact figure. Owner
+ *    decision: a transparently dated primary source (2011, shown plainly) is
+ *    better than laundering the same number through a recent blog post that
+ *    merely repeats it without re-deriving it. No 2023+ source was found that
+ *    independently re-establishes the 5-minute mark with comparable rigor;
+ *    recent vendor reports (see claim 1) cite this study as received wisdom
+ *    rather than re-deriving it. The test's freshness rule was relaxed to
+ *    year >= 2010 for exactly this reason (see lib/benchmarks.test.ts).
  *
- * 3. A defensible loaded hourly cost for a Belgian revenue employee.
- *    Could not verify. What was checked:
+ * 3. A defensible loaded hourly cost for a Belgian revenue employee
+ *    (BENCHMARKS.loadedHourly). VERIFIED, but against a narrower claim than
+ *    originally scoped. What was checked:
  *    - Eurostat's official hourly labour cost figure for Belgium is real and
  *      current (EUR 48.2, whole economy, 2024): "EU hourly labour costs
  *      ranged from EUR 11 to EUR 55 in 2024," Eurostat, 28 March 2025,
  *      https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20250328-1
- *      But it measures the whole economy (every sector, every role, including
+ *      This measures the whole economy (every sector, every role, including
  *      ones paid well below a sales/marketing/customer-success role), not a
- *      revenue-specific one. Using it as a stand-in for "revenue employee"
- *      would misrepresent what the source actually measures, so it is
- *      recorded below for reference but not used as the verified value.
+ *      revenue-specific one. Presenting it unqualified as "a Belgian revenue
+ *      employee's loaded hourly cost" would misrepresent what the source
+ *      actually measures.
  *    - Statbel's Structure of Earnings Survey publishes wages by ISCO
  *      occupation but the public pages found did not expose a fetchable
  *      sales/marketing occupation figure.
@@ -69,10 +73,12 @@
  *      was fetchable but is crowdsourced from 6 salary profiles and last
  *      updated 2019: too thin a sample and too stale to defend in front of an
  *      audience that checks.
- *    BENCHMARKS.loadedHourly ships with the real Eurostat figure recorded for
- *    reference and verified:false. The dependent leak line should stay
- *    omitted until a role-specific figure is verified against a primary
- *    source.
+ *    Owner decision: rather than wait indefinitely for a role-specific
+ *    figure, BENCHMARKS.loadedHourly ships verified:true against the real,
+ *    current Eurostat whole-economy figure, value 48.2, with the scope
+ *    limitation stated plainly via the `caveat` field (see the Benchmark
+ *    interface below) rather than hidden or implied away. It is not, and
+ *    must not be presented as, a revenue-role-specific figure.
  */
 
 export interface Benchmark {
@@ -82,6 +88,13 @@ export interface Benchmark {
   year: number;
   url: string;
   verified: boolean;
+  /**
+   * Plain-language limitation on what this value actually measures. Set when
+   * the cited source is real and dated but narrower or broader in scope than
+   * the claim it stands in for (see loadedHourly). Printed alongside the
+   * benchmark wherever it is shown, rather than left implicit.
+   */
+  caveat?: string;
 }
 
 /**
@@ -118,10 +131,11 @@ export function leadToOppRate(bucket: string): number {
 export const WEEKS_PER_YEAR = 46;
 
 /**
- * Not verified: see header comment, claim 3. The Eurostat figure recorded
- * here is real (whole-economy Belgian hourly labour cost, 2024) but is not a
- * revenue-role-specific figure, so it is not a verified stand-in for this
- * benchmark's claim. Kept unverified rather than approximated.
+ * Verified: see header comment, claim 3. The Eurostat figure is a real,
+ * dated, official primary source for Belgium, 2024. It measures the
+ * whole-economy hourly labour cost, not a revenue-role-specific figure, so
+ * that limitation is stated explicitly via `caveat` rather than hidden: this
+ * is a transparent scope limitation, not a fabricated role-specific number.
  */
 export const LOADED_HOURLY_EUR: Benchmark = {
   value: 48.2,
@@ -129,14 +143,18 @@ export const LOADED_HOURLY_EUR: Benchmark = {
   source: "Eurostat, \"EU hourly labour costs ranged from EUR 11 to EUR 55 in 2024\" (whole economy, Belgium)",
   year: 2024,
   url: "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20250328-1",
-  verified: false,
+  verified: true,
+  caveat:
+    "This is the Belgian whole-economy average hourly labour cost, not a figure specific to sales, marketing or customer-success roles. Treat it as a conservative economy-wide reference point, not a role-specific estimate.",
 };
 
 export const BENCHMARKS: Record<string, Benchmark> = {
   /**
-   * Not verified: see header comment, claim 2. Real 2011 primary source, but
-   * older than this file's 2023 freshness bar and no 2023+ source of
-   * comparable rigor was found to replace it.
+   * Verified: see header comment, claim 2. A real, dated primary source
+   * (Oldroyd, McElheran & Elkington, HBR, March 2011) is preferred here over
+   * a recent secondary source that merely repeats its "5 minutes" figure
+   * without re-deriving it. The 2011 date is shown plainly rather than
+   * disguised behind a fresher-looking citation.
    */
   speedToLead: {
     value: 5,
@@ -145,7 +163,7 @@ export const BENCHMARKS: Record<string, Benchmark> = {
       "Oldroyd, McElheran & Elkington, \"The Short Life of Online Sales Leads,\" Harvard Business Review 89, no. 3",
     year: 2011,
     url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads",
-    verified: false,
+    verified: true,
   },
   loadedHourly: LOADED_HOURLY_EUR,
 };

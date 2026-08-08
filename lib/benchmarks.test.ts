@@ -6,7 +6,12 @@ test("every benchmark carries a source and a year", () => {
   for (const [key, b] of Object.entries(BENCHMARKS)) {
     assert.ok(b.source.length > 0, `${key} has no source`);
     assert.ok(b.url.startsWith("https://"), `${key} has no url`);
-    assert.ok(b.year >= 2023, `${key} is stale: ${b.year}`);
+    // A blanket "recent years only" bar would reject a seminal primary study
+    // (e.g. speedToLead's 2011 HBR source) in favor of a newer secondary
+    // source that merely repeats the same figure without re-deriving it. A
+    // transparently dated original is preferred over that, so the floor here
+    // only rules out truly ancient or placeholder years, not genuine age.
+    assert.ok(b.year >= 2010, `${key} is stale: ${b.year}`);
   }
 });
 
