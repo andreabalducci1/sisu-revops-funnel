@@ -1,19 +1,36 @@
 # Business
 
-> Qui tu es, ce que tu vends, à qui. Rempli par /onboarding.
+> Who Andrea is, what he sells, to whom.
 
-## Identité
+## Identity
 
-- **Prénom / Nom** : [À CONFIGURER]
-- **Entreprise** : [À CONFIGURER]
-- **Lien principal** : [À CONFIGURER]
+- **Name**: Andrea Balducci
+- **Company**: SiSu RevOps
+- **Based**: Belgium
+- **Main site**: https://sisurevops.com
+- **Funnel**: https://check.sisurevops.com
 
-## Ce que tu vends
+## What he sells
 
-[À CONFIGURER]
+RevOps consulting and revenue automation for B2B sales teams. In practice: cleaning up
+CRM data, defining pipeline stages that actually hold, automating handoffs, and building
+reporting and attribution that leadership can trust. Delivery is hands-on engineering,
+not slideware. A productized offer (leaning a "Claude Code for RevOps" bootcamp) is being
+finalized.
 
-## À qui tu vends (client idéal)
+## Who he sells to
 
-- **Profil** : [À CONFIGURER]
-- **Problème principal qu'ils ont** : [À CONFIGURER]
-- **Ce qu'ils veulent atteindre** : [À CONFIGURER]
+- **Profile**: B2B companies with a sales team, typically 10 to 500 employees, where
+  revenue operations grew organically and now leaks. Often the founder, the head of
+  sales, or a RevOps lead who inherited a messy stack.
+- **Main problem**: they have CRM data and tools but no reliable engine. Deals move
+  inconsistently, forecasts are guesswork, handoffs are manual, and nobody can say which
+  channels actually produce revenue.
+- **What they want**: predictable pipeline, forecasts they can defend, and less manual
+  work per closed deal.
+
+## Voice
+
+Problem-first, plain, radically candid. A RevOps engineer talking, not a marketer.
+No fake testimonials or invented social proof. Avoid "supercharge", "unleash",
+"game-changer", "leverage", "synergy", "10x".

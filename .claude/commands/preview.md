@@ -1,22 +1,29 @@
 ---
-description: Lance le serveur de développement pour voir le tunnel en local, avec nettoyage du cache Next.js.
+description: Run the local dev server to see the funnel, with Next.js cache cleanup.
 ---
-# Preview — Serveur local
+# Preview, local server
 
-Voir le tunnel dans le navigateur en local.
+See the funnel in the browser locally.
 
 ## Workflow
 
-1. Si besoin, nettoyer le cache : supprimer `.next`.
-2. Vérifier que les dépendances sont installées (`node_modules` présent, sinon `npm install`).
-3. Lancer `npm run dev` (port 3000 par défaut).
-4. Donner les URLs à tester :
-   - Landing : http://localhost:3000
-   - Ressource : http://localhost:3000/ressource (nécessite d'avoir soumis l'opt-in)
-   - Réserver : http://localhost:3000/reserver
-   - Merci : http://localhost:3000/merci
-   - Admin : http://localhost:3000/admin
-5. Inviter l'utilisateur à parcourir le funnel et signaler ce qu'il veut ajuster (`/copy`, `/design`).
+1. Clear the cache if things look stale: delete `.next`.
+2. Check dependencies are installed (`node_modules` present, otherwise `npm install`).
+3. Run `npm run dev` (port 3000 by default).
+4. URLs to check:
+   - Landing plus quiz: http://localhost:3000
+   - Report: http://localhost:3000/report (requires having completed the opt-in)
+   - Book: http://localhost:3000/book
+   - Thanks: http://localhost:3000/thanks
+   - Admin: http://localhost:3000/admin
+5. Walk the funnel and note anything to adjust (`/copy`, `/design`).
 
-## Note
-Les pages `/ressource` et `/merci` sont protégées par cookie (gating funnel). Pour les voir, passer par le parcours normal (opt-in → ressource → réserver → merci).
+## Notes
+
+- `/report` and `/thanks` are cookie-gated by `middleware.ts`. To see them, go through the
+  real flow: quiz -> teaser -> email -> report -> book -> thanks. Navigating directly
+  bounces you to `/`.
+- Locally the DemoBanner WILL render and list unconfigured integrations. That is expected:
+  it is gated to non-production on purpose and never appears on the live site.
+- Without `ANTHROPIC_API_KEY` the report falls back to a canned version, so the flow still
+  renders end to end with no keys at all.

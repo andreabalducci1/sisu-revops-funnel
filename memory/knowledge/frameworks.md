@@ -1,64 +1,75 @@
-# Frameworks — Copywriting & Conversion
+# Frameworks, copywriting and conversion
 
-> Référence utilisée par /copy et /optimize. Pré-rempli avec les frameworks éprouvés.
+> Reference used by /copy and /optimize. Pre-filled with proven frameworks.
 
-## Frameworks de copywriting
+## Copywriting frameworks
 
-### AIDA (Attention, Intérêt, Désir, Action)
-- **Attention** : un hook qui arrête le scroll (question, chiffre choc, promesse).
-- **Intérêt** : développer le problème, montrer qu'on le comprend.
-- **Désir** : la solution + la preuve (résultats, témoignages).
-- **Action** : un CTA clair et unique.
+### AIDA (Attention, Interest, Desire, Action)
+- **Attention**: a hook that stops the scroll (question, hard number, promise).
+- **Interest**: name the problem, show you understand it.
+- **Desire**: the solution plus the proof (results, specifics).
+- **Action**: one clear CTA.
 
-### PAS (Problème, Agitation, Solution)
-- **Problème** : nommer la douleur précise du prospect.
-- **Agitation** : amplifier les conséquences si rien ne change.
-- **Solution** : présenter la ressource/l'offre comme le chemin.
+### PAS (Problem, Agitate, Solution)
+- **Problem**: name the prospect's precise pain.
+- **Agitate**: show what it costs if nothing changes.
+- **Solution**: present the report and the call as the path.
 
 ### BAB (Before, After, Bridge)
-- **Before** : la situation actuelle (frustration).
-- **After** : la situation désirée (le résultat rêvé).
-- **Bridge** : comment y arriver (la ressource, puis l'appel).
+- **Before**: today's situation (the frustration).
+- **After**: the situation they want.
+- **Bridge**: how to get there (the score, then the call).
 
-## Anatomie d'une landing page qui convertit
+## Anatomy of a landing page that converts
 
-1. **Hook / Headline** : la promesse principale en une phrase. Bénéfice, pas feature.
-2. **Sous-titre** : précise pour qui + comment, lève le "c'est pas pour moi".
-3. **Bullets de valeur** : 3 raisons concrètes de laisser son email.
-4. **Preuve sociale** : nombre d'inscrits, témoignage, logos.
-5. **CTA unique** : un seul objectif = capter l'email. Pas de distraction (pas de menu, pas de liens sortants).
+1. **Hook / headline**: the main promise in one line. Benefit, not feature.
+2. **Subhead**: who it is for and how, so "this is not for me" gets answered early.
+3. **Value bullets**: three concrete reasons to spend the effort and the email.
+4. **Proof**: real specifics only. Never invent testimonials, numbers, or logos.
+5. **One CTA**: a single objective. No nav, no outbound links, no competing buttons.
 
-## Page ressource (délivrance + montée du désir)
+## Quiz as the lead magnet
 
-- Délivrer la ressource immédiatement (tenir la promesse = confiance).
-- Pendant/après la consommation, créer le pont vers l'appel : "tu as vu X, maintenant si tu veux Y, parlons-en".
-- Un seul CTA : réserver l'appel.
+- Let them answer BEFORE asking for the email. Effort invested makes the ask land better.
+- Keep the score deterministic, instant and free, so nothing costs money pre-email.
+- Show a real partial result at the teaser (band plus one dimension). A fake or empty
+  teaser burns trust.
+- The gate should feel like unlocking something earned, not paying upfront.
 
-## Page de réservation
+## Report page (deliver, then build desire)
 
-- Réduire la friction : calendrier visible directement, pas d'étape inutile.
-- Rappeler le bénéfice de l'appel (ce que le prospect en retire), pas juste "réserve".
-- Rassurer : "sans engagement", durée claire.
+- Deliver immediately and in full. Keeping the promise is what earns the next step.
+- Be specific to their answers. The whole differentiator over a generic PDF is that this
+  could not have been written for anyone else.
+- Stay at the "what", not the "how". The call is where the "how" gets built.
+- One CTA: book the call.
 
-## Règles CRO (Conversion Rate Optimization)
+## Booking page
 
-- **Un seul CTA par page** : chaque choix supplémentaire baisse la conversion.
-- **Friction minimale** : demander le strict nécessaire (email seul à l'opt-in).
-- **Cohérence du message** : la promesse de la pub/landing doit matcher la ressource.
-- **Vitesse** : une page lente tue la conversion. Images légères, peu de JS.
-- **Mobile-first** : la majorité du trafic est mobile. Tester sur petit écran.
-- **Urgence honnête** : rareté réelle (places limitées) > fausse urgence (qui détruit la confiance).
-- **Preuve à chaque étape** : témoignages, chiffres, garanties.
+- Minimum friction: calendar visible immediately, email and name prefilled.
+- Restate what they get from the call, not just "book a time".
+- Reassure: clear duration, no obligation.
 
-## À éviter
+## CRO rules
 
-- Spam words ("gratuit" en excès, "incroyable", "sans effort").
-- Fausses promesses ou claims invérifiables.
-- Plusieurs CTA concurrents.
-- Murs de texte sans hiérarchie visuelle.
+- **One CTA per page**: every extra choice costs conversion.
+- **Minimum friction**: ask for the least you can (email, optionally first name).
+- **Message match**: the ad and landing promise must match what the report delivers.
+- **Speed**: a slow page kills conversion. Light images, little JS.
+- **Mobile first**: most traffic is mobile. Check the small screen.
+- **Honest urgency**: real scarcity beats manufactured urgency, which destroys trust.
 
-## Apprentissages spécifiques au business
+## Avoid
 
-> Accumulés via /optimize et /memory-save (A/B, ce qui convertit ici).
+- Spam words ("free" overused, "incredible", "effortless").
+- False or unverifiable claims.
+- Competing CTAs.
+- Walls of text with no visual hierarchy.
+- Em-dashes anywhere, including in the generated report. Use commas, colons, parentheses,
+  or a single hyphen.
 
-[Vide pour l'instant]
+## Business-specific learnings
+
+> Accumulated via /optimize and /memory-save.
+
+Nothing measured yet. PostHog is not wired, so there is no conversion data to learn from.

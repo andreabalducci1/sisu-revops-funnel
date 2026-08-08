@@ -1,29 +1,44 @@
-# Offre
+# Offer
 
-> L'offre derrière le tunnel + l'appel proposé. Rempli par /onboarding et /copy.
+> The offer behind the funnel and the call it drives to.
 
-## L'offre principale
+## The paid offer
 
-- **Nom** : [À CONFIGURER]
-- **Promesse** (le résultat concret pour le client) : [À CONFIGURER]
-- **Pour qui** : [À CONFIGURER]
+- **Name**: not locked yet. Leaning a "Claude Code for RevOps" bootcamp.
+- **Promise**: teach RevOps people to build their own automations instead of waiting on
+  engineering, so the fixes ship in days rather than quarters.
+- **For whom**: RevOps leads and sales ops people at B2B companies who already feel the
+  pain of manual process and want to build, not just diagnose.
+- **Status**: the funnel is deliberately product-agnostic. All offer copy lives in
+  config.ts, so locking this does not require touching components.
 
-## La ressource gratuite (aimant)
+## The lead magnet
 
-- **Type** : [vsl / vidéo / pdf / quiz]
-- **Titre** : [À CONFIGURER]
-- **Ce qu'elle apporte** : [À CONFIGURER]
+- **Type**: interactive quiz plus an AI-written report
+- **Title**: RevOps maturity check
+- **What it gives**: a deterministic 0 to 100 score across five dimensions (Data Hygiene,
+  Pipeline Process, Automation and Handoffs, Reporting and Attribution, Tech Stack), a
+  band label, and a personalized report written by Claude naming the three fixes to make
+  first. Delivered on screen immediately and emailed as a copy.
+- **Why it works**: the score is instant, deterministic and free, so there is no LLM cost
+  before the email is captured. The narrative report is the only paid step, and it is
+  idempotent per lead.
 
-## L'appel proposé (étape /reserver)
+## The call (/book)
 
-- **Type d'appel** : [découverte / audit / stratégie...]
-- **Durée** : [À CONFIGURER]
-- **Ce que le prospect en retire** : [À CONFIGURER]
+- **Type**: RevOps mini-Audit
+- **Cal.com**: balducci / 25-min-chat-linkedin
+- **Duration**: 25 minutes
+- **What the prospect gets**: a read of their score together and a map of the fastest
+  wins for their specific setup.
 
-## Preuves
+## Proof
 
-- Témoignages, chiffres, résultats : [À CONFIGURER]
+Deliberately none invented. No fake testimonials, no borrowed logos. The proof is the
+report itself: it is specific to their answers, which a generic PDF cannot be.
 
-## Objections fréquentes
+## Common objections
 
-- [À CONFIGURER]
+- "Another generic PDF." Answered by the report being visibly personalized to their answers.
+- "This is a sales trap." Answered by "Free. About a minute. No pitch."
+- "I already know my problems." Answered by ranking the gaps and naming what to fix first.

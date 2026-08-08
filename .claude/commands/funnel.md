@@ -1,25 +1,28 @@
 ---
-description: Orchestrateur qui génère ou régénère les 4 pages du tunnel. Applique le copywriting et le design dans config.ts.
+description: Orchestrator that regenerates the funnel's four steps, applying copy and design into config.ts.
 ---
-# Funnel — Génération du tunnel
+# Funnel, regenerate the funnel
 
-Génère ou régénère les 4 pages (Landing, Ressource, Réserver, Merci) en cohérence.
+Regenerate the four steps (Landing plus quiz, Report, Book, Thanks) coherently.
 
-## Prérequis
-Lire : `memory/identity/business.md`, `memory/identity/offer.md`, `memory/funnel/strategy.md`, `memory/funnel/copy.md`, `memory/identity/brand.md`.
-Si `business.md` contient `[À CONFIGURER]` → proposer `/onboarding` d'abord.
+## Prerequisites
+Read `memory/identity/business.md`, `memory/identity/offer.md`,
+`memory/funnel/strategy.md`, `memory/funnel/copy.md`, `memory/identity/brand.md`.
 
 ## Workflow
 
-1. **Copy** : s'il manque du copywriting validé (`copy.md` vide), lancer `/copy` d'abord.
-2. **Design** : si la marque est encore au défaut et l'utilisateur veut son identité, proposer `/design`.
-3. **Appliquer dans `config.ts`** : écrire toutes les sections (`business`, `brand`, `landing`, `resource`, `booking`, `thankyou`, `legal`) à partir de la mémoire.
-   - C'est la SEULE source : ne pas mettre de texte en dur dans les pages.
-4. **Vérifier** : les 4 pages lisent bien `config.ts` (elles le font déjà — ne pas réécrire le JSX sauf besoin réel de structure).
-5. **Preview** : lancer `/preview` et inviter l'utilisateur à vérifier dans le navigateur.
+1. **Copy**: if validated copy is missing or stale in `copy.md`, run `/copy` first.
+2. **Design**: only if a visual change is actually wanted, run `/design`.
+3. **Apply into `config.ts`**: write every section (`business`, `brand`, `landing`,
+   `quiz`, `booking`, `thankyou`, `ui`, `legal`) from memory.
+   - config.ts is the ONLY source. Never hardcode text in pages.
+4. **Verify** the pages still read from `config.ts`. Do not rewrite JSX unless the
+   structure genuinely needs to change.
+5. **Preview**: run `/preview` and check the flow in the browser.
 
-## Règles
-- Toujours confirmer avant d'écraser un `config.ts` déjà personnalisé.
-- Synchroniser `config.ts` ET `memory/funnel/copy.md`.
-- Ne pas casser le mode démo (laisser les fallbacks).
-- Après génération, proposer `/deploy`.
+## Rules
+- Always confirm before overwriting a customized `config.ts`.
+- Keep `config.ts` and `memory/funnel/copy.md` in sync.
+- Do not break demo mode. Leave the `isXConfigured()` fallbacks intact.
+- Changing the quiz (`config.quiz`) changes scoring. If weights, options, or bands move,
+  re-check `lib/scoring.ts` expectations and hand-verify a couple of answer sets.

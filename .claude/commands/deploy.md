@@ -1,28 +1,41 @@
 ---
-description: Met le tunnel en ligne. Pousse le code sur GitHub et déploie sur Vercel via les MCP. Guidé et confirmé.
+description: Ship the funnel to production on Vercel. Guided and confirmed at each external step.
 ---
-# Deploy — Mise en ligne
+# Deploy, ship to production
 
-Déployer le tunnel sur Vercel, avec GitHub comme source.
+Deploy the funnel to Vercel.
 
-## Prérequis
-- Le tunnel compile (`npm run build` passe).
-- MCP `vercel` et `github` disponibles. Sinon, guider l'utilisateur pour les activer.
+## How this project actually deploys
 
-## Workflow (confirmer AVANT chaque action externe)
+Direct from the local working tree with the Vercel CLI, not through GitHub. There is a
+known two-account wall on this project (the Vercel account and the GitHub repo owner
+differ), which makes the git-connected flow fail with `repo_no_access`. The CLI path
+sidesteps it:
 
-1. **Vérifier le build** : lancer `npm run build`. S'il échoue, corriger avant de déployer.
-2. **GitHub** :
-   - Si pas encore de repo distant : proposer de créer un repo (MCP github) et y pousser le code. **Confirmer avant.**
-   - Sinon : pousser les derniers commits.
-3. **Vercel** :
-   - Déployer via `mcp__vercel__deploy_to_vercel` (ou connecter le repo GitHub à Vercel). **Confirmer avant.**
-4. **Variables d'environnement** : RAPPELER d'ajouter sur Vercel toutes les clés du `.env` (Airtable, Resend, PostHog, ADMIN_SECRET, NEXT_PUBLIC_SITE_URL avec l'URL de prod). Le `.env` local n'est PAS déployé.
-5. **Retourner l'URL live** et proposer de tester le parcours complet en prod.
-6. Mettre à jour `memory/funnel/config.md` (repo + URL prod) et `memory/brain.md` (déployé : oui).
+```
+npx vercel --prod --yes
+```
 
-## Règles
-- **Confirmer chaque action irréversible** (création repo, push, déploiement).
-- Ne jamais commiter `.env` (il est dans `.gitignore`).
-- Après déploiement, mettre `NEXT_PUBLIC_SITE_URL` à l'URL de prod (pour les liens email Resend).
-- Rappeler à l'utilisateur de marquer le repo comme "Template" sur GitHub s'il veut le partager.
+Live production: https://check.sisurevops.com (project `sisu-revops-funnel`).
+
+## Workflow (confirm BEFORE each external action)
+
+1. **Typecheck and build**: run `npx tsc --noEmit`, then `npm run build`. Fix failures
+   before deploying.
+2. **Check env parity**: every key the code reads must exist in Vercel production
+   (`npx vercel env ls production`). Note that `vercel env pull` returns EMPTY values for
+   Encrypted vars, so never use it to verify a secret's content. Verify by behavior instead.
+3. **Deploy**: `npx vercel --prod --yes`. Confirm before running.
+4. **Smoke test production**, do not assume:
+   - Landing returns 200 and shows no demo banner.
+   - `POST /api/lead` creates an Airtable record.
+   - `POST /api/analyze` returns a real report, and a second call returns `cached: true`.
+   - Check runtime logs for `[analyze] report email failed`.
+5. Update `memory/funnel/config.md` if any URL or ID changed.
+
+## Rules
+- **Confirm every irreversible action.**
+- Never commit `.env` (it is gitignored).
+- `NEXT_PUBLIC_SITE_URL` must point at the production URL, since the report email links
+  back to `/book` through it.
+- Remove any temporary diagnostic endpoint before finishing, and delete its secret.

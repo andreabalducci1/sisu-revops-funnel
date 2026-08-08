@@ -1,40 +1,41 @@
 ---
-description: Affiche l'état complet du projet : configuration, tunnel, outils connectés, et prochaines actions.
+description: Show full project status: configuration, funnel, connected tools, and next actions.
 ---
-# Brain Status — État du projet
+# Brain status, project overview
 
-Donner une vue d'ensemble rapide.
+Give a fast overall picture.
 
 ## Workflow
 
-1. Lire `memory/brain.md` + les fichiers d'identité/funnel.
-2. Vérifier l'état des clés `.env` (présence, pas les valeurs) : Airtable, PostHog, Resend, Cal.com, ADMIN_SECRET.
-3. Afficher :
+1. Read `memory/brain.md` plus the identity and funnel files.
+2. Check which env keys are present (presence only, never values): Anthropic, Airtable,
+   Resend, PostHog, ADMIN_SECRET. Cal.com lives in `config.ts`, not `.env`.
+3. Print:
    ```
-   === Claude Tunnel OS ===
+   === SiSu RevOps Funnel ===
 
-   BUSINESS : [prénom] - [entreprise] (ou "non configuré")
-   RESSOURCE : [type] - [titre]
+   BUSINESS : Andrea Balducci, SiSu RevOps
+   MAGNET   : RevOps maturity quiz + Claude report
 
    SETUP :
-   - Onboarding : [ok / à faire]
-   - Copywriting : [ok / défaut]
-   - Design : [personnalisé / défaut]
+   - Copy      : [ok / default]
+   - Design    : [SiSu brand / default]
 
-   OUTILS :
-   - Airtable  : [connecté / manquant]
-   - PostHog   : [connecté / manquant]
-   - Resend    : [connecté / manquant]
-   - Cal.com   : [configuré / manquant]
+   TOOLS :
+   - Anthropic : [connected / missing]
+   - Airtable  : [connected / missing]
+   - Resend    : [connected / missing]
+   - Cal.com   : [configured / missing]
+   - PostHog   : [connected / deferred]
 
-   DÉPLOIEMENT : [en ligne (URL) / local seulement]
+   DEPLOYMENT : [live (URL) / local only]
 
-   PROCHAINES ACTIONS :
+   NEXT ACTIONS :
    1. ...
-   2. ...
    ```
-4. Suggérer la prochaine étape la plus logique du playbook.
+4. Suggest the most logical next step.
 
-## Règles
-- Si rien n'est configuré → recommander `/onboarding`.
-- Ne jamais afficher les valeurs des clés.
+## Rules
+- Never print key values.
+- PostHog missing is expected, not an error. Flag it as optional and note that `/analytics`
+  and `/admin` stay dark without it.

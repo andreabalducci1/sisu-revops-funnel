@@ -1,27 +1,28 @@
-# Direction artistique
+# Brand direction
 
-> Couleurs, typo, ton visuel du tunnel. Affiné via /design. Miroir de config.ts > brand.
+> Colors, type, visual tone. Mirrors config.ts > brand and app/globals.css.
 
-## Couleurs (défaut)
+## Colors
 
-- **Primaire** : #c2410c (terracotta)
-- **Accent** : #0f766e (teal)
-- **Fond** : #faf6f0 (crème)
-- **Thème** : clair
+- **Background**: Warm Ivory, #f4f1ec
+- **Ink**: Deep Charcoal, #1c1c1c
+- **Accent (primary)**: Dusty Blue-Grey, #5a88b8
+- **Accent (secondary)**: Muted Sage
+- **Theme**: light
 
-> C'est le thème par défaut du template. Lance `/design` pour créer une identité unique
-> adaptée à TON business (et te démarquer).
+## Typography
 
-## Typographie (défaut)
+- **Display**: DM Serif Display (editorial serif, used for headlines)
+- **Body**: DM Sans
 
-- **Display** : Fraunces (serif éditorial)
-- **Body** : Inter
+## Visual tone
 
-## Ton visuel
+Editorial and calm, paper-like. Generous whitespace, a soft radial wash behind the hero,
+a subtle paper grain. One signature motion only (reveal on load). Respect
+prefers-reduced-motion.
 
-- Style : éditorial, chaleureux, papier
-- Sobre, beaucoup d'espace, une seule animation signature (reveal au load)
+## Rules
 
-## Notes
-
-[À AFFINER via /design]
+- config.ts is the source of truth. No hardcoded color or copy in components.
+- Keep utility classes (.btn-primary, .surface-card, .reveal) aligned with the palette.
+- Check contrast and the mobile rendering after any change.

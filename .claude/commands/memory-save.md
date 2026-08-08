@@ -1,24 +1,27 @@
 ---
-description: Persiste les apprentissages de la session dans le bon fichier mémoire.
+description: Persist this session's learnings into the right memory file.
 ---
-# Memory Save — Sauvegarde des apprentissages
+# Memory save
 
-Stocker ce qui a été appris pour les prochaines sessions.
+Store what was learned so future sessions start informed.
 
 ## Workflow
 
-1. Identifier ce qui mérite d'être retenu dans la session :
-   - Décisions de positionnement / offre → `memory/identity/`
-   - Ce qui convertit / résultats de tests → `memory/knowledge/lessons.md` + `memory/synthesis/conversion-log.md`
-   - Choix de copy/design validés → `memory/funnel/copy.md` / `memory/identity/brand.md`
-   - Changements d'outils/IDs → `memory/funnel/config.md`
-2. Écrire dans le fichier approprié (AJOUTER / METTRE À JOUR, jamais écraser).
-3. Mettre à jour `memory/brain.md` :
-   - Section "Derniers apprentissages" (avec la date du jour en YYYY-MM-DD).
-   - "Contexte rapide" et "Prochaines actions" si ça a changé.
-4. Confirmer ce qui a été sauvegardé et où.
+1. Identify what is worth keeping:
+   - Positioning or offer decisions -> `memory/identity/`
+   - What converts, test results -> `memory/knowledge/lessons.md` and
+     `memory/synthesis/conversion-log.md`
+   - Validated copy or design choices -> `memory/funnel/copy.md`,
+     `memory/identity/brand.md`
+   - Tool IDs, URLs, infrastructure changes -> `memory/funnel/config.md`
+   - Gotchas and dead ends that cost time -> `memory/knowledge/lessons.md`
+2. Write into the right file. Add or update, never blow away existing content.
+3. Update `memory/brain.md` if the status or next actions changed. Keep it an index.
+4. Confirm what was saved and where.
 
-## Règles
-- Convertir les dates relatives en dates absolues.
-- Ne pas dupliquer une info déjà présente : mettre à jour l'existant.
-- Garder `brain.md` concis (c'est un index).
+## Rules
+- Convert relative dates to absolute (YYYY-MM-DD).
+- Do not duplicate an existing note. Update it instead.
+- Record the failure modes, not just the successes. A documented dead end saves the next
+  session more time than a documented win.
+- No em-dashes.

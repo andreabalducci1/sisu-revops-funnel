@@ -1,42 +1,54 @@
-# Claude Tunnel OS — Index Mémoire
+# SiSu RevOps Funnel, memory index
 
-> Ce fichier est lu à CHAQUE début de session. Il donne le contexte rapide.
+> Read at the start of every session. Fast context, then jump to the detail files.
 
-## État du setup
+## What this project is
 
-- [ ] Onboarding complété
-- [ ] Business configuré (business.md, offer.md)
-- [ ] Direction artistique définie (brand.md, /design)
-- [ ] Copywriting des 4 pages (copy.md, /copy)
-- [ ] Airtable connecté (CRM leads)
-- [ ] PostHog connecté (analytics)
-- [ ] Resend connecté (envoi ressource)
-- [ ] Cal.com configuré (réservation)
-- [ ] Déployé sur Vercel
+A 4-step conversion funnel for SiSu RevOps. Cold or warm traffic lands on a RevOps
+maturity quiz, gets an instant score, trades an email for a Claude-written personalized
+report, and books a call.
 
-## Fichiers mémoire
+```
+Landing + quiz  ->  Report  ->  Book  ->  Thanks
+      /            /report     /book    /thanks
+```
 
-| Fichier | Statut |
-|---------|--------|
-| identity/business.md | À configurer |
-| identity/offer.md | À configurer |
-| identity/brand.md | Défaut (terracotta/crème) |
-| funnel/strategy.md | À configurer |
-| funnel/copy.md | À configurer |
-| funnel/config.md | À configurer |
-| knowledge/frameworks.md | Référence (pré-rempli) |
-| knowledge/lessons.md | Vide |
+## Status
 
-## Contexte rapide
+- [x] Business and offer captured (identity/business.md, identity/offer.md)
+- [x] Brand defined (identity/brand.md)
+- [x] Copy written for all 4 steps (funnel/copy.md)
+- [x] Airtable connected (lead CRM, base appFKYUcURrO7jMrf)
+- [x] Anthropic connected (report generation, claude-sonnet-5)
+- [x] Resend connected (report email, domain verified)
+- [x] Cal.com configured (balducci / 25-min-chat-linkedin)
+- [x] Deployed and live at https://check.sisurevops.com
+- [ ] PostHog (deliberately deferred, optional analytics, /admin stays dark without it)
 
-> Rempli par /onboarding.
+## Memory files
 
-**[À CONFIGURER]** — Lance `/onboarding` pour démarrer.
+| File | Status |
+|---|---|
+| identity/business.md | Done |
+| identity/offer.md | Done, final offer still to lock |
+| identity/brand.md | Done, mirrors config.ts > brand |
+| funnel/strategy.md | Done |
+| funnel/copy.md | Done, mirrors config.ts |
+| funnel/config.md | Done, live IDs and URLs |
+| knowledge/frameworks.md | Reference, pre-filled |
+| knowledge/lessons.md | Accumulating |
 
-## Derniers apprentissages
+## Fast context
 
-> Accumulés au fil des sessions via /memory-save.
+Andrea Balducci, RevOps engineer based in Belgium, trading as SiSu RevOps.
+Sells RevOps consulting and automation to B2B sales teams. The funnel's lead magnet is a
+free RevOps maturity score plus a personalized report. The conversion goal is a booked
+25 minute RevOps mini-Audit call. The paid offer at the end is still being finalized
+(leaning a "Claude Code for RevOps" bootcamp), so the funnel is built product-agnostic:
+all offer copy lives in config.ts and can change without touching components.
 
-## Prochaines actions suggérées
+## Next actions
 
-1. `/onboarding` — configurer ton business + les outils
+1. Lock the paid offer, then update identity/offer.md and config.ts
+2. Wire PostHog if funnel analytics are wanted (unlocks /analytics and /admin)
+3. Drive traffic, then run /analytics and /optimize

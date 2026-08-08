@@ -1,33 +1,39 @@
 ---
-description: Affiche les performances du funnel depuis PostHog. Taux de conversion par étape et recommandations.
+description: Show funnel performance from PostHog. Conversion rate per step plus recommendations.
 ---
-# Analytics — Performances du funnel
+# Analytics, funnel performance
 
-Lire les stats de conversion du tunnel.
+Read the funnel's conversion stats.
 
-## Prérequis
-PostHog configuré (`NEXT_PUBLIC_POSTHOG_KEY`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`).
-Si non configuré → proposer `/onboarding`.
+## Prerequisites
+PostHog configured (`NEXT_PUBLIC_POSTHOG_KEY`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID`).
+Not configured yet on this project. If missing, say so plainly and stop. Do not invent numbers.
 
 ## Workflow
 
-1. Récupérer les comptages des events du funnel (via `lib/posthog-query.ts` / l'endpoint `/api/funnel/stats`, ou directement le MCP PostHog) :
-   `landing_view → lead_signup → resource_view → booking_click → booking_completed`.
-2. Calculer les taux de conversion entre chaque étape.
-3. Afficher un tableau clair :
+1. Pull the funnel event counts (via `lib/posthog-query.ts`, the `/api/funnel/stats`
+   endpoint, or the PostHog MCP):
+   `landing_view -> quiz_start -> quiz_complete -> analysis_teaser_shown -> lead_signup -> analysis_revealed -> booking_click -> booking_completed`.
+2. Compute the conversion rate between each step.
+3. Print a clear table:
    ```
-   Étape              | Volume | Conv. vs précédente
-   Vue landing        | ...    | —
-   Email capturé      | ...    | ...%
-   Ressource vue      | ...    | ...%
-   Clic réserver      | ...    | ...%
-   Appel réservé      | ...    | ...%
+   Step                | Volume | Conv. vs previous
+   Landing view        | ...    | n/a
+   Quiz started        | ...    | ...%
+   Quiz completed      | ...    | ...%
+   Teaser shown        | ...    | ...%
+   Email unlocked      | ...    | ...%
+   Report revealed     | ...    | ...%
+   Booking clicked     | ...    | ...%
+   Call booked         | ...    | ...%
    ```
-4. Identifier l'étape la plus faible (le goulot).
-5. Recommander 1-2 actions concrètes. Proposer `/optimize` pour la corriger.
-6. Logger le snapshot dans `memory/synthesis/conversion-log.md`.
+4. Identify the weakest step (the bottleneck).
+5. Recommend one or two concrete actions. Offer `/optimize` to act on it.
+6. Log the snapshot in `memory/synthesis/conversion-log.md`.
 
-## Règles
-- Le dashboard visuel est aussi dispo sur `/admin` (protégé par ADMIN_SECRET).
-- Exclure le trafic localhost/preview (déjà fait dans la requête HogQL).
-- Pas de PostHog → pas de données : le dire clairement, ne pas inventer de chiffres.
+## Rules
+- The visual dashboard also lives at `/admin` (protected by ADMIN_SECRET).
+- Exclude localhost and preview traffic (already handled in the HogQL query).
+- No PostHog means no data. Say that clearly rather than estimating.
+- Watch `analysis_error` separately: it signals report generation failures, not a
+  conversion problem.

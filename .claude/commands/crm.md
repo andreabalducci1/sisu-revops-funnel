@@ -1,29 +1,32 @@
 ---
-description: Gère la base Airtable des leads. Consulte, filtre et met à jour les contacts capturés par le tunnel.
+description: Manage the Airtable leads base. Inspect, filter, and update contacts captured by the funnel.
 ---
-# CRM — Gestion des leads (Airtable)
+# CRM, lead management (Airtable)
 
-Consulter et gérer les leads via le MCP Airtable.
+Inspect and manage leads via the Airtable MCP.
 
-## Prérequis
-Lire `memory/funnel/config.md` pour Base ID + Table Leads ID.
-Si non configuré → proposer `/onboarding`.
+## Prerequisites
+Read `memory/funnel/config.md` for the Base ID and table name
+(base `appFKYUcURrO7jMrf`, table `Leads`).
 
-## Capacités
+## Capabilities
 
-- **Voir les leads** : `mcp__airtable__list_records` sur la table Leads (paginer si besoin).
-- **Filtrer** : par `Statut` (optin / resource_viewed / booking / client / perdu), par date, par source.
-- **Stats rapides** : compter par statut, taux d'inscrits → bookings.
-- **Mettre à jour** : changer un statut, ajouter une note (`mcp__airtable__update_records`).
+- **View leads**: `mcp__airtable__list_records` on Leads (paginate when needed).
+- **Filter**: by `Statut` (optin, booking, client, lost), by date, by source, by
+  `Maturity Band`.
+- **Quick stats**: count by status and by band, opt-in to booking rate, average
+  `Maturity Score`.
+- **Update**: change a status or add a note (`mcp__airtable__update_records`).
 
-## Workflow type
+## Workflow
 
-1. Demander ce que l'utilisateur veut (voir, filtrer, stats, MAJ).
-2. Exécuter via le MCP Airtable.
-3. Afficher un tableau lisible (prénom, email, statut, date).
-4. Proposer une action de suite (ex : marquer un lead "client", exporter).
+1. Ask what Andrea wants (view, filter, stats, update).
+2. Run it through the Airtable MCP.
+3. Print a readable table (first name, email, score, band, status, date).
+4. Suggest a follow-up action.
 
-## Règles
-- Max 10 records par appel PATCH Airtable.
-- Confirmer avant une mise à jour en masse (> 5 leads).
-- Ne jamais exposer la clé API.
+## Rules
+- Max 10 records per Airtable PATCH call.
+- Confirm before any bulk update (more than 5 leads).
+- Never expose the API key.
+- Test leads from the build (addresses containing `claude-`) are safe to delete.

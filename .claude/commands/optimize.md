@@ -1,28 +1,37 @@
 ---
-description: Optimise l'étape du funnel qui convertit le moins, sur la base des données PostHog.
+description: Improve the weakest converting step of the funnel, based on PostHog data.
 ---
-# Optimize — Optimisation de la conversion
+# Optimize, conversion improvement
 
-Améliorer le maillon faible du tunnel.
+Fix the weakest link in the funnel.
 
-## Prérequis
-Lire `memory/knowledge/frameworks.md` (règles CRO) et `memory/synthesis/conversion-log.md`.
-Idéalement, des données PostHog (sinon, optimiser sur la base des best practices).
+## Prerequisites
+Read `memory/knowledge/frameworks.md` (CRO rules) and
+`memory/synthesis/conversion-log.md`. Ideally PostHog data. Without it, optimize from
+best practice and say plainly that it is not data-driven.
 
 ## Workflow
 
-1. Lancer `/analytics` (ou réutiliser les chiffres récents) pour trouver l'étape la plus faible.
-2. Diagnostiquer la cause probable selon l'étape :
-   - **Landing→Lead faible** : hook peu clair, trop de friction, promesse faible, pas de preuve.
-   - **Lead→Ressource faible** : email ressource non reçu (Resend ?), ou pas de redirection.
-   - **Ressource→Clic faible** : ressource qui ne crée pas le désir, CTA peu visible/peu motivant.
-   - **Clic→RDV faible** : calendrier compliqué, manque de réassurance, créneaux indisponibles.
-3. Proposer une variante concrète (nouveau headline, nouveau CTA, ajout de preuve, simplification).
-4. Appliquer dans `config.ts` (+ `memory/funnel/copy.md`) après validation.
-5. Logger le changement et l'hypothèse dans `memory/synthesis/conversion-log.md`.
-6. Inviter à laisser tourner puis re-mesurer avec `/analytics`.
+1. Run `/analytics` (or reuse recent numbers) to find the weakest step.
+2. Diagnose the likely cause for that specific step:
+   - **Landing to quiz start**: headline is not landing, promise too vague, the quiz is
+     not visibly short or free.
+   - **Quiz start to complete**: too many questions, option wording is confusing, or the
+     progress is unclear. Drop-off mid-quiz is a wording problem more often than a length one.
+   - **Complete to email unlock**: the teaser did not feel valuable enough to pay an email
+     for. Reveal a more meaningful slice, or make the locked part more concrete.
+   - **Unlock to report revealed**: technical, not persuasion. Check `analysis_error`,
+     the Anthropic key, and the report page's fallback chain.
+   - **Report to booking click**: the report is satisfying but not creating desire. It may
+     be answering the "how" and removing the reason to talk.
+   - **Booking click to booked**: calendar friction, unclear duration, no availability.
+3. Propose one concrete variant (new headline, new CTA, reworked teaser, simpler step).
+4. Apply in `config.ts` and `memory/funnel/copy.md` after sign-off.
+5. Log the change and the hypothesis in `memory/synthesis/conversion-log.md`.
+6. Let it run, then re-measure with `/analytics`.
 
-## Règles
-- Une hypothèse à la fois (pour savoir ce qui marche).
-- S'appuyer sur les frameworks CRO, pas sur l'intuition seule.
-- Documenter chaque test (date, changement, résultat attendu).
+## Rules
+- One hypothesis at a time, otherwise you learn nothing.
+- Lean on the frameworks, not intuition alone.
+- Document every test (date, change, expected result).
+- Distinguish persuasion problems from technical failures before rewriting copy.
