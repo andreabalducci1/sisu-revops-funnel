@@ -59,6 +59,36 @@ test("total is clamped to 35% of modelled bookings", () => {
   assert.equal(r.capped, true);
 });
 
+// --- Critical 3: the capped total must reconcile with the printed line
+// arithmetic instead of jumping to an unrelated figure. rawTotal makes the
+// cap itself a visible arithmetic step (raw sum -> cap -> capped total). ---
+
+test("rawTotal is the uncapped sum of the line amounts, and total is exactly the 35% ceiling when capped", () => {
+  const r = computeLeak({ ...full, headcount: 200 }, 0);
+  assert.ok(r);
+  assert.equal(r.capped, true);
+
+  const sumOfLines = r.lines.reduce((s, l) => s + l.amount, 0);
+  assert.ok(
+    Math.abs(r.rawTotal - sumOfLines) < 1e-9,
+    "rawTotal must equal the sum of the line amounts, so a reader can hand-add the printed lines and match it"
+  );
+
+  const ceiling = r.modelledBookings * 0.35;
+  assert.ok(
+    Math.abs(r.total - ceiling) < 1e-9,
+    "total must equal exactly 35% of modelled bookings when capped, not an unrelated figure"
+  );
+  assert.ok(r.rawTotal > r.total, "the cap must actually have reduced the total below the raw sum");
+});
+
+test("rawTotal equals total when the cap did not fire: nothing to reconcile away", () => {
+  const r = computeLeak(full, 33);
+  assert.ok(r);
+  assert.equal(r.capped, false);
+  assert.equal(r.rawTotal, r.total);
+});
+
 test("never returns NaN or a negative amount", () => {
   const r = computeLeak({ acv: 0, winRate: 0, inboundPerMonth: 0, headcount: 0 }, 50);
   if (r) {
@@ -295,4 +325,39 @@ test("the drag line's workings print the hourly rate at real precision, not eur(
   // changes how the rate is printed, never any computed value.
   const roundedTotal = `EUR ${Math.round(drag.amount).toLocaleString("en-US")}`;
   assert.ok(drag.workings.some((w) => w.includes(roundedTotal)));
+});
+
+// --- Important 6: the drag line's reclaimable-hours figure also needs full
+// precision, not just the hourly rate. Printed at 1 decimal, 3.484 h/wk
+// showed as "3.5", so hand-recomputing the printed line (headcount x hours x
+// weeks x rate) gave a different number than the printed total. Since the
+// automation score feeding this figure is always an integer 0-100
+// (lib/scoring.ts rounds every dimension score), reclaimablePerWeek never
+// needs more than 3 decimal places to be exact, so printing 3 decimals
+// reconciles exactly rather than merely narrowing the gap. ---
+
+test("the drag line's workings print reclaimable hours at full precision, so hand-recomputing the printed line matches the printed total exactly", () => {
+  const r = computeLeak({ headcount: 6 }, 33);
+  assert.ok(r);
+  const drag = r.lines.find((l) => l.id === "drag");
+  assert.ok(drag);
+
+  // automation score 33 -> reclaimablePerWeek = 5.2 x (100 - 33) / 100 = 3.484 exactly.
+  const hoursWorking = drag.workings.find((w) => w.includes("h/wk"));
+  assert.ok(hoursWorking, "no working line mentions reclaimable hours");
+  assert.ok(
+    hoursWorking!.includes("3.484"),
+    `expected full-precision hours (3.484), got: ${hoursWorking}`
+  );
+  assert.ok(
+    !hoursWorking!.includes("3.5 h/wk"),
+    "hours are still rounded to one decimal, which does not reconcile with the printed total"
+  );
+
+  // Hand-recompute using exactly the figures printed in the workings (3.484
+  // hours, the real WEEKS_PER_YEAR, the real loadedHourly rate) and confirm
+  // it lands on the same whole-euro total actually printed for this line.
+  const handComputed = 6 * 3.484 * WEEKS_PER_YEAR * BENCHMARKS.loadedHourly.value;
+  const printedTotal = `EUR ${Math.round(drag.amount).toLocaleString("en-US")}`;
+  assert.equal(`EUR ${Math.round(handComputed).toLocaleString("en-US")}`, printedTotal);
 });

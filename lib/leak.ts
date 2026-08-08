@@ -61,6 +61,14 @@ export interface LeakLine {
 export interface LeakResult {
   modelledBookings: number;
   lines: LeakLine[];
+  /**
+   * Sum of every line's amount BEFORE the 35% cap is applied. Equal to
+   * `total` whenever `capped` is false. Exposed so a report view can print
+   * the cap as its own visible arithmetic step (raw sum, then the cap, then
+   * the capped total) instead of jumping straight from the printed line
+   * workings to a `total` that does not follow from them by itself.
+   */
+  rawTotal: number;
   total: number;
   /** Total as a share of modelled bookings, 0 to 1. */
   ratio: number;
@@ -186,7 +194,14 @@ export function computeLeak(
       id: "drag",
       label: "Manual admin drag",
       workings: [
-        `${inputs.headcount} revenue staff x ${reclaimablePerWeek.toFixed(1)} h/wk reclaimable (automation score ${clampedScore}/100)`,
+        // toFixed(3), not (1): automationScore is always an integer 0-100
+        // (lib/scoring.ts rounds every dimension score), so reclaimablePerWeek
+        // (MAX_RECLAIMABLE_HOURS_PER_WEEK x integer / 100) never needs more
+        // than 3 decimal places to be exact. Printing it rounded to 1 decimal
+        // (e.g. 3.484 shown as "3.5") let a reader hand-multiply the printed
+        // line and land on a different total than the one printed below it;
+        // 3 decimals reconciles exactly instead of merely reducing the gap.
+        `${inputs.headcount} revenue staff x ${reclaimablePerWeek.toFixed(3)} h/wk reclaimable (automation score ${clampedScore}/100)`,
         // Belgian whole-economy figure, not role-specific: stated plainly here
         // rather than papered over, per benchmarks.ts's caveat on this value.
         // Printed at full precision (not eur()'s whole-euro rounding) so the
@@ -208,6 +223,7 @@ export function computeLeak(
   return {
     modelledBookings,
     lines,
+    rawTotal: raw,
     total,
     ratio: modelledBookings > 0 ? total / modelledBookings : 0,
     capped,

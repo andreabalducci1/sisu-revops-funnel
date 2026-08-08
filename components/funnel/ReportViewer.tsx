@@ -28,9 +28,13 @@ interface Stashed {
    * after /api/analyze). Absent, not null, on the /api/report fallback: that
    * route only stores and returns { report, score }, so a hard refresh in a
    * new tab shows the full narrative report without the euro block. That is
-   * a graceful degradation, not a bug: no leak model means no money is
-   * mentioned anywhere, which is the same rule this page applies whenever
-   * the visitor never filled in the numbers block at all.
+   * a graceful degradation, not a bug: the report's prose (readback,
+   * findings, limits, nextStep) never mentions a currency figure regardless
+   * of whether a leak model is present (lib/anthropic.ts's SYSTEM prompt and
+   * cannedReport both enforce that unconditionally now), so nothing on this
+   * page depends on `leak` being present to keep money out of the narrative.
+   * `leak` only ever gates the euro block itself, which has nothing to fall
+   * back to without it.
    */
   leak?: LeakResult | null;
   /** Cohort question id -> chosen option id (config.quiz.cohort). Same
@@ -105,6 +109,20 @@ export function ReportViewer() {
   const viewedRef = useRef(false);
 
   /**
+   * Fire-once guard for BOOKING_CLICK. The booking flow no longer lives
+   * behind a CTA that navigates to /book (see git history: the old
+   * BookingCta, and the page-level CTA block that used it, were removed once
+   * the booking widget was embedded directly on /report). FUNNEL_STEPS still
+   * lists booking_click as the step between result_view and
+   * booking_completed, so it is fired here instead, once the booking
+   * container (the CalEmbed widget below, section 10) actually renders. That
+   * keeps it a real, always-eventually-firing funnel stage rather than a
+   * permanent hard zero on the admin chart. React StrictMode double-invokes
+   * effects in dev, hence the ref.
+   */
+  const bookingSeenRef = useRef(false);
+
+  /**
    * RESULT_VIEW fires only when the report actually rendered with data, as
    * opposed to RESOURCE_VIEW, which PageView fires unconditionally on every
    * mount of app/report/page.tsx (including when the stash turns out to be
@@ -150,6 +168,15 @@ export function ReportViewer() {
       })
       .catch(() => setState("empty"));
   }, []);
+
+  // Fires BOOKING_CLICK once the booking container is actually about to
+  // render (state reaches "ready", so section 10 below mounts with it). See
+  // bookingSeenRef's comment above for why this replaces a CTA click.
+  useEffect(() => {
+    if (state !== "ready" || bookingSeenRef.current) return;
+    bookingSeenRef.current = true;
+    track(FUNNEL_EVENTS.BOOKING_CLICK);
+  }, [state]);
 
   const { capture, loading: copyLoading, error: copyError } = useLeadCapture();
   const [copyEmail, setCopyEmail] = useState("");
@@ -346,9 +373,28 @@ export function ReportViewer() {
               gap: "0.5rem",
             }}
           >
-            <p style={{ margin: 0, color: "var(--color-ink-soft)", fontSize: "0.95rem" }}>
-              Modelled bookings: {eur(leak.modelledBookings)}/yr
-            </p>
+            {/* Bookings are unknown, not zero, when the numbers block did not
+                include the speed inputs (only headcount, say). Printing "EUR
+                0/yr" next to a real euro total would read as a fact rather
+                than an absent input, so this (and the ratio below, which is
+                meaningless without a bookings denominator) only renders when
+                a bookings figure was actually modelled. */}
+            {leak.modelledBookings > 0 && (
+              <p style={{ margin: 0, color: "var(--color-ink-soft)", fontSize: "0.95rem" }}>
+                Modelled bookings: {eur(leak.modelledBookings)}/yr
+              </p>
+            )}
+            {/* The cap, when it fires, made its own arithmetic step visible:
+                the raw sum of the printed lines above, then the cap that was
+                applied to it, then the capped total below. Without this line
+                the total printed next would not follow from the workings
+                printed above it. */}
+            {leak.capped && (
+              <p style={{ margin: 0, color: "var(--color-ink-soft)", fontSize: "0.95rem" }}>
+                Lines total {eur(leak.rawTotal)}/yr. Capped for conservatism at{" "}
+                {Math.round(leak.ratio * 100)}% of modelled bookings: {eur(leak.total)}/yr.
+              </p>
+            )}
             <p style={{ fontFamily: "var(--font-display)", fontSize: "1.7rem", margin: 0 }}>
               {eur(leak.total)}/yr
               {leak.capped && (
@@ -357,9 +403,11 @@ export function ReportViewer() {
                 </span>
               )}
             </p>
-            <p style={{ margin: 0, color: "var(--color-ink-soft)", fontSize: "0.95rem" }}>
-              Ratio to modelled bookings: {Math.round(leak.ratio * 100)}%
-            </p>
+            {leak.modelledBookings > 0 && (
+              <p style={{ margin: 0, color: "var(--color-ink-soft)", fontSize: "0.95rem" }}>
+                Ratio to modelled bookings: {Math.round(leak.ratio * 100)}%
+              </p>
+            )}
             <p style={{ fontStyle: "italic", color: "var(--color-ink-soft)", fontSize: "0.9rem", margin: 0 }}>
               {leak.disclaimer}
             </p>
