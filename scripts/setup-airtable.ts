@@ -64,6 +64,7 @@ const FIELDS: Array<{ name: string; type: string; options?: unknown }> = [
   { name: "Score Automation", ...num },
   { name: "Score Reporting", ...num },
   { name: "Score Stack", ...num },
+  { name: "Score AI Readiness", ...num },
   { name: "Quiz Answers", type: "multilineText" },
   { name: "Report", type: "multilineText" },
   { name: "Report Generated At", type: "singleLineText" },
