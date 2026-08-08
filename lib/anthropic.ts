@@ -117,7 +117,7 @@ Rules:
 - For each supplied contradiction, copy claimA, claimB and whyItMatters exactly as given. Do not rewrite, rephrase or shorten whyItMatters: it has already been reviewed for overstatement.
 - Never reorder or re-rank the fixes. Use the supplied order and write the prose for each.
 - For each supplied fix, copy the order and whyThisPosition exactly as given, and use the supplied label as the title. Only firstStep (one concrete starting action) is yours to write.
-- Never invent or recompute a euro figure. If no leak model is supplied, do not mention money at all. If one is supplied, you may cite its total exactly as given, never a number you derived yourself.
+- Never put a euro figure, or any currency amount, in your prose, whether or not a leak model is supplied. The euro block on the report page is the only place money is shown, printed there with its own arithmetic, source and disclaimer. A number quoted in prose has none of those next to it, so it never belongs in a sentence you write, not even the leak model's own total.
 - Every finding needs three distinct fields: whatsHappening (the mechanism, echoing their own answer), whatItsCosting (the consequence, loss framed), quietlyCapping (which OTHER dimension this one ceilings).
 - readback: one or two sentences restating their inputs before you conclude anything, so they can catch a wrong entry.
 - limits: state plainly that this is self-reported and triage-level, not validated evidence.
@@ -183,8 +183,11 @@ function formatLeak(leak: LeakResult | null): string {
     "Leak lines:",
     lines,
     `Total leak: ${eur(leak.total)}/yr (${(leak.ratio * 100).toFixed(0)}% of modelled bookings)${leak.capped ? ", capped for conservatism" : ""}`,
-    `Disclaimer to respect if you mention this figure: "${leak.disclaimer}"`,
-    `If you cite this figure, copy ${eur(leak.total)} exactly. Never compute your own number.`,
+    // For your context only, not for prose: the report page's euro block
+    // already prints this total, its workings and its disclaimer verbatim.
+    // Do not repeat, restate or paraphrase this figure in whatsHappening,
+    // whatItsCosting, quietlyCapping, readback, limits or nextStep.
+    "This data is for your context only. Do not cite this or any other euro figure in your prose; the report's euro block already shows it.",
   ].join("\n");
 }
 
@@ -373,7 +376,15 @@ function cannedNextStep(score: ScoreResult): string {
 /**
  * A plausible, score-shaped report for demo mode and error fallback. No LLM
  * call: every field is built from the deterministic inputs alone (score,
- * contradictions, fixes, leak), so it always validates against reportSchema.
+ * contradictions, fixes), so it always validates against reportSchema.
+ *
+ * `leak` is accepted (mirroring generateReport's call shape) but no longer
+ * used to build any field: a euro figure used to be baked into the
+ * automation finding's whatItsCosting here, which put a currency amount into
+ * prose with no arithmetic, source or disclaimer next to it, and kept
+ * showing up on paths where the euro block itself does not render (the
+ * /api/report fallback, the emailed copy). Money belongs only in the euro
+ * block now; see the SYSTEM prompt's matching rule for the live-model path.
  */
 export function cannedReport(
   score: ScoreResult,
@@ -391,10 +402,11 @@ export function cannedReport(
       dimension: d.id,
       label: d.label,
       whatsHappening: happeningFor(d),
-      whatItsCosting:
-        d.id === "automation" && leak
-          ? `${verdictFor(d.score)} Modelled at roughly ${eur(leak.total)} a year across your funnel.`
-          : verdictFor(d.score),
+      // No euro figure here, leak model present or not: a number quoted in
+      // prose has no arithmetic, source or disclaimer next to it, unlike the
+      // euro block, which is the only place on the report money belongs (see
+      // the SYSTEM prompt's matching rule for the live-model path).
+      whatItsCosting: verdictFor(d.score),
       quietlyCapping: CANNED_CEILING,
     })),
     contradictions: contradictions.map((c) => ({

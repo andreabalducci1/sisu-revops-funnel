@@ -118,6 +118,30 @@ test("cannedReport never mentions a euro figure when no leak model is supplied",
   }
 });
 
+// --- Important 5: a euro figure used to be baked into the automation
+// finding's whatItsCosting whenever a leak model WAS supplied, which put a
+// currency amount into prose with no arithmetic, source or disclaimer next
+// to it, and kept showing up on paths where the euro block itself never
+// renders (the /api/report fallback, the emailed copy). Money belongs only
+// in the euro block now, leak model present or not. ---
+
+test("cannedReport never mentions a euro figure even when a leak model IS supplied", () => {
+  const { score, contradictions, fixes, leak } = buildDeterministicInputs();
+  assert.ok(leak, "fixture should produce a leak model for this test to be meaningful");
+  const report = cannedReport(score, contradictions, fixes, leak, "Andrea");
+  const strings = [
+    report.readback,
+    report.headline,
+    report.limits,
+    report.nextStep,
+    ...report.findings.flatMap((f) => [f.whatsHappening, f.whatItsCosting, f.quietlyCapping]),
+  ];
+  for (const s of strings) {
+    assert.ok(!s.includes("EUR"), `unexpected euro figure in prose: ${s}`);
+  }
+});
+
+
 test("cannedReport never contains an em-dash or en-dash", () => {
   const { score, contradictions, fixes, leak } = buildDeterministicInputs();
   const report = cannedReport(score, contradictions, fixes, leak, "Andrea");
