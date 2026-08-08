@@ -1,6 +1,5 @@
 import config from "@/config";
 import { ReportViewer } from "@/components/funnel/ReportViewer";
-import { BookingCta } from "@/components/funnel/BookingCta";
 import { PageView } from "@/components/funnel/PageView";
 import { FUNNEL_EVENTS } from "@/lib/events";
 
@@ -38,30 +37,6 @@ export default function ReportPage() {
 
         <div className="reveal reveal-3">
           <ReportViewer />
-        </div>
-
-        {/* CTA block to booking */}
-        <div
-          className="surface-card reveal reveal-4"
-          style={{
-            marginTop: "2.8rem",
-            padding: "2.2rem",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1.4rem",
-          }}
-        >
-          <div style={{ maxWidth: "34ch" }}>
-            <h2 style={{ fontSize: "1.35rem", marginBottom: "0.4rem" }}>
-              {resource.ctaHeadline}
-            </h2>
-            <p style={{ color: "var(--color-ink-soft)", fontSize: "0.98rem" }}>
-              {resource.ctaSubhead}
-            </p>
-          </div>
-          <BookingCta label={resource.ctaToBooking} variant="outline" />
         </div>
       </section>
     </main>

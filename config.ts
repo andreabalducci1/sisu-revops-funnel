@@ -343,15 +343,14 @@ const config = {
     report: { maxTokens: 2000 },
   },
 
-  // Step 2: Resource (repurposed as the personalized report in P4).
+  // Step 2: Resource (repurposed as the personalized report in P4). The
+  // report's own nextStep (lib/anthropic.ts, band-varied) is the only
+  // booking CTA on this page now: no separate CTA copy here to fall out of
+  // sync with it.
   resource: {
     eyebrow: "Your report is ready",
     title: "Your RevOps maturity report",
     description: "Here is where your setup stands and what to fix first.",
-    ctaToBooking: "Book a 25-min call",
-    ctaHeadline: "Prefer a second pair of eyes?",
-    ctaSubhead:
-      "Optional: book a short call and we will map the fastest wins together. No pitch.",
   },
 
   // Step 3: Book (Cal.com).
