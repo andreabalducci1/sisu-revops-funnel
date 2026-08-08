@@ -72,22 +72,22 @@ const config = {
     headline: "Score your RevOps setup.",
     headlineItalic: "See where revenue quietly leaks.",
     subhead:
-      "Answer five quick questions and get an instant maturity score, plus a personalized read on the three fixes that move the needle first.",
+      "Answer 12 questions (about three minutes) and get an instant maturity score, plus a personalized read on the three fixes that move the needle first.",
     bullets: [
-      "A clear score across five revenue-ops dimensions",
+      "A clear score across six revenue-ops dimensions",
       "The gaps costing you pipeline, ranked",
       "What to fix first, specific to your setup",
     ],
     cta: "Get my score",
     formLabel: "Your best email",
-    socialProof: "Free. About a minute. No pitch.",
+    socialProof: "Free. About 3 minutes. No pitch.",
     previewCard: {
       label: "Sample result",
       score: "72",
       scoreUnit: "/ 100",
       title: "RevOps maturity score",
       lines: [
-        "Five dimensions: data, pipeline, automation, reporting, stack",
+        "Six dimensions: data, pipeline, reporting, automation, stack, AI readiness",
         "A personalized report, not a generic PDF",
         "Built by a RevOps engineer, not a marketer",
       ],
@@ -334,8 +334,7 @@ const config = {
   resource: {
     eyebrow: "Your report is ready",
     title: "Your RevOps maturity report",
-    description:
-      "Here is where your setup stands and what to fix first. A copy is on its way to your inbox.",
+    description: "Here is where your setup stands and what to fix first.",
     ctaToBooking: "Book a 25-min call",
     ctaHeadline: "Prefer a second pair of eyes?",
     ctaSubhead:
