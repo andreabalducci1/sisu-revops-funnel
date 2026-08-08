@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx --test lib/scoring.test.ts"
+    "test": "tsx --test lib/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.111.0",
