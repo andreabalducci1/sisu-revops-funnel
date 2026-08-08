@@ -145,7 +145,9 @@ export function MaturityQuiz() {
   // double click can double-fire a handler); each event this component sends
   // to PostHog gets its own ref so it is never counted twice.
   const startedRef = useRef(false);
+  const calibrationCompleteRef = useRef(false);
   const quizCompleteRef = useRef(false);
+  const numbersResolvedRef = useRef(false);
 
   const cohortQuestions = quiz.cohort;
   const currentCohort = cohortQuestions[cohortIndex];
@@ -170,9 +172,10 @@ export function MaturityQuiz() {
       setCohortIndex(cohortIndex + 1);
       return;
     }
-    // TODO(task-11): add CALIBRATION_COMPLETE to FUNNEL_EVENTS (lib/events.ts)
-    // and fire it here, guarded the same way as startedRef above, once the
-    // calibration step is done: track(FUNNEL_EVENTS.CALIBRATION_COMPLETE, { cohort: nextCohort }).
+    if (!calibrationCompleteRef.current) {
+      calibrationCompleteRef.current = true;
+      track(FUNNEL_EVENTS.CALIBRATION_COMPLETE, { cohort: nextCohort });
+    }
     setStep("answering");
     setIndex(0);
   }
@@ -236,6 +239,12 @@ export function MaturityQuiz() {
             fixes: json.data.fixes ?? [],
             cohort,
             firstName: undefined,
+            // Raw inputs, not returned by /api/analyze itself. Kept so the
+            // results page can regenerate and email a copy of this same
+            // report later without asking the visitor to redo the quiz; see
+            // ReportViewer's requestCopy.
+            answers,
+            numbers,
           })
         );
       }
@@ -246,14 +255,18 @@ export function MaturityQuiz() {
   }
 
   function skipNumbers() {
-    // TODO(task-11): add NUMBERS_SKIPPED to FUNNEL_EVENTS (lib/events.ts) and
-    // fire it here: track(FUNNEL_EVENTS.NUMBERS_SKIPPED).
+    if (!numbersResolvedRef.current) {
+      numbersResolvedRef.current = true;
+      track(FUNNEL_EVENTS.NUMBERS_SKIPPED);
+    }
     void runAnalysis(undefined);
   }
 
   function submitNumbers() {
-    // TODO(task-11): add NUMBERS_PROVIDED to FUNNEL_EVENTS (lib/events.ts) and
-    // fire it here: track(FUNNEL_EVENTS.NUMBERS_PROVIDED).
+    if (!numbersResolvedRef.current) {
+      numbersResolvedRef.current = true;
+      track(FUNNEL_EVENTS.NUMBERS_PROVIDED);
+    }
     void runAnalysis(buildNumbersPayload(numbersForm));
   }
 
@@ -349,7 +362,7 @@ export function MaturityQuiz() {
         <div style={{ width: "100%" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.9rem" }}>
             <span className="eyebrow">
-              Quick calibration {cohortIndex + 1} of {cohortQuestions.length}
+              {quiz.calibration.eyebrow} {cohortIndex + 1} of {cohortQuestions.length}
             </span>
             <button type="button" onClick={back} className="link-underline" style={backButtonStyle}>
               <ArrowLeft size={14} /> Back
@@ -444,7 +457,7 @@ export function MaturityQuiz() {
       >
         <div style={{ width: "100%" }} className="reveal reveal-1">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.9rem" }}>
-            <span className="eyebrow">Last step</span>
+            <span className="eyebrow">{quiz.numbers.eyebrow}</span>
             <button type="button" onClick={back} className="link-underline" style={backButtonStyle}>
               <ArrowLeft size={14} /> Back
             </button>
@@ -466,7 +479,7 @@ export function MaturityQuiz() {
                     onChange={(e) => setNumbersForm({ ...numbersForm, [field.id]: e.target.value })}
                     style={inputStyle}
                   >
-                    <option value="">Not sure</option>
+                    <option value="">{field.placeholder}</option>
                     {RESPONSE_BUCKETS.map((bucket) => (
                       <option key={bucket.id} value={bucket.id}>
                         {bucket.label}

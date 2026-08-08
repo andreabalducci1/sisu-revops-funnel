@@ -6,8 +6,8 @@ import config from "@/config";
 import { track } from "@/lib/posthog-client";
 import { FUNNEL_EVENTS } from "@/lib/events";
 import type { Report } from "@/lib/schemas";
-import type { ScoreResult } from "@/lib/scoring";
-import type { LeakResult } from "@/lib/leak";
+import type { Answers, ScoreResult } from "@/lib/scoring";
+import type { LeakInputs, LeakResult } from "@/lib/leak";
 import { CalEmbed } from "@/components/funnel/CalEmbed";
 import { useLeadCapture } from "@/components/funnel/useLeadCapture";
 
@@ -37,6 +37,16 @@ interface Stashed {
    * fallback-path caveat as leak. */
   cohort?: Record<string, string>;
   firstName?: string;
+  /**
+   * Raw quiz answers and numbers-block input, present only on the
+   * sessionStorage fast path (MaturityQuiz stashes them alongside the
+   * generated report). Absent on the /api/report fallback, which never
+   * stored them. requestCopy below uses these to email a copy of the report
+   * through the existing /api/analyze pipeline; when absent, it skips
+   * emailing rather than sending nothing useful.
+   */
+  answers?: Answers;
+  numbers?: LeakInputs;
 }
 
 type State = "loading" | "ready" | "empty";
@@ -95,17 +105,15 @@ export function ReportViewer() {
   const viewedRef = useRef(false);
 
   /**
-   * TODO(task-11): add RESULT_VIEW to FUNNEL_EVENTS (lib/events.ts) and fire
-   * that instead of RESOURCE_VIEW here. RESOURCE_VIEW is reused as a
-   * stand-in "the report actually rendered with data" signal until that
-   * event exists; it is distinct from the page-mount view PageView already
-   * fires unconditionally in app/report/page.tsx (which fires even when the
-   * stash turns out to be empty).
+   * RESULT_VIEW fires only when the report actually rendered with data, as
+   * opposed to RESOURCE_VIEW, which PageView fires unconditionally on every
+   * mount of app/report/page.tsx (including when the stash turns out to be
+   * empty). RESULT_VIEW is the one FUNNEL_STEPS uses for the admin funnel.
    */
   function markViewed(score: ScoreResult) {
     if (viewedRef.current) return;
     viewedRef.current = true;
-    track(FUNNEL_EVENTS.RESOURCE_VIEW, { score: score.overall, band: score.band });
+    track(FUNNEL_EVENTS.RESULT_VIEW, { score: score.overall, band: score.band });
   }
 
   useEffect(() => {
@@ -150,14 +158,45 @@ export function ReportViewer() {
   async function requestCopy(e: FormEvent) {
     e.preventDefault();
     if (!copyEmail) return;
-    // TODO(task-11): add COPY_REQUESTED to FUNNEL_EVENTS (lib/events.ts) and
-    // fire it here on success. capture() below already fires LEAD_SIGNUP as
-    // the broader "we now have this email" signal; COPY_REQUESTED would be
-    // the finer-grained "they used the copy form specifically" one.
-    const id = await capture({ email: copyEmail, firstName: data?.firstName });
-    if (id) {
-      setCopySent(true);
-      setCopyEmail("");
+    const email = copyEmail;
+
+    // capture() fires LEAD_SIGNUP as the broader "we now have this email"
+    // signal. COPY_REQUESTED is the finer-grained "they used the copy form
+    // specifically" one, fired only once capture actually succeeds.
+    const id = await capture({ email, firstName: data?.firstName, answers: data?.answers });
+    if (!id) return;
+
+    track(FUNNEL_EVENTS.COPY_REQUESTED);
+    setCopySent(true);
+    setCopyEmail("");
+
+    // Actually send the copy. /api/analyze already does this correctly
+    // (idempotent per lead via "Report Emailed At", gated behind
+    // isResendConfigured, no-op without Airtable): calling it here with the
+    // now-known leadId and email is the same request the initial quiz
+    // completion would have made had an email already been on file. Only
+    // the sessionStorage fast path carries the raw answers this needs; the
+    // /api/report fallback (hard refresh, new tab) never has them, so there
+    // is no report to send and this is skipped rather than sending nothing
+    // useful.
+    if (!data?.answers) return;
+    try {
+      await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadId: id,
+          email,
+          firstName: data.firstName,
+          answers: data.answers,
+          cohort: data.cohort,
+          numbers: data.numbers,
+        }),
+      });
+    } catch {
+      // Best effort: the lead is already captured either way. If this
+      // fails, the report is simply not emailed; nothing else in the funnel
+      // depends on it.
     }
   }
 
