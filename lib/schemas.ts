@@ -76,12 +76,14 @@ export type OptinInput = z.infer<typeof optinSchema>;
 
 /**
  * Request body for /api/analyze. Answers are required (we recompute the
- * score). leadId is optional: the email gate is gone, so a visitor gets the
- * full diagnosis without identifying themselves.
+ * score). leadId and email are both optional: the email gate is gone, so a
+ * visitor gets the full diagnosis without identifying themselves. email
+ * stays validated (format, disposable-domain blocklist) when it IS present,
+ * for the optional capture that now lives on the results page.
  */
 export const analyzeSchema = z.object({
   leadId: z.string().max(60).optional(),
-  email: emailField,
+  email: emailField.optional(),
   firstName: z.string().max(50).optional(),
   company: z.string().max(100).optional(),
   answers: z.record(z.string(), z.string()),

@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
             Report: JSON.stringify({ report, answersKey: key }),
             "Report Generated At": new Date().toISOString(),
           };
-          if (isResendConfigured() && !alreadyEmailed) {
+          if (isResendConfigured() && !alreadyEmailed && email) {
             const res = await sendReportEmail({ to: email, firstName, report, score });
             if (res.emailed) update["Report Emailed At"] = new Date().toISOString();
             else console.error(`[analyze] report email failed (${email}):`, res.reason);
