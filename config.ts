@@ -101,6 +101,12 @@ const config = {
       note: "About 3 minutes. 12 questions. No account, no email required.",
     },
 
+    calibration: {
+      /** Prefix for "Quick calibration {n} of {m}". The component appends the
+       * live count, since that part is derived from state, not copy. */
+      eyebrow: "Quick calibration",
+    },
+
     cohort: [
       {
         id: "headcount",
@@ -287,6 +293,7 @@ const config = {
     ],
 
     numbers: {
+      eyebrow: "Last step",
       title: "Optional: put a number on it",
       note: "Skip this and you still get the full diagnosis. Fill it in and the report prices the gap in euros. Nothing is sent anywhere.",
       skipCta: "Skip, show my results",
@@ -295,7 +302,13 @@ const config = {
         { id: "acv", label: "Average contract value", unit: "EUR", type: "number" },
         { id: "winRate", label: "Win rate", unit: "%", type: "number" },
         { id: "inboundPerMonth", label: "New inbound leads per month", unit: "", type: "number" },
-        { id: "responseBucket", label: "Median time to first contact", unit: "", type: "select" },
+        {
+          id: "responseBucket",
+          label: "Median time to first contact",
+          unit: "",
+          type: "select",
+          placeholder: "Not sure",
+        },
         { id: "headcount", label: "People on the revenue team", unit: "", type: "number" },
       ],
     },

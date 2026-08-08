@@ -49,6 +49,14 @@ export interface LeadFields {
   "Score Reporting"?: number;
   "Score Stack"?: number;
   "Score AI Readiness"?: number;
+  "Cohort Headcount"?: string;
+  "Cohort Motion"?: string;
+  "Input ACV"?: number;
+  "Input Win Rate"?: number;
+  "Input Inbound Per Month"?: number;
+  "Input Response Bucket"?: string;
+  "Input Team Headcount"?: number;
+  "Leak Total"?: number;
   "Quiz Answers"?: string;
   Report?: string;
   "Report Generated At"?: string;
