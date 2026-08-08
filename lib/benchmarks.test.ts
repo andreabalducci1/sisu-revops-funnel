@@ -26,6 +26,26 @@ test("unknown bucket returns the slowest rate, never a guess upward", () => {
   assert.equal(leadToOppRate("unknown"), leadToOppRate(RESPONSE_BUCKETS[0].id));
 });
 
+// --- Important 8: the printed "Lead to opportunity now X%, at under 5
+// minutes Y%" figures come from RESPONSE_BUCKETS, a directional modelling
+// assumption (see this file's header), not from the cited HBR study itself.
+// The line was citing BENCHMARKS.speedToLead (a real, dated source) next to
+// numbers that source does not publish. The caveat must say so plainly
+// rather than let the citation imply the percentages are HBR's. ---
+
+test("speedToLead's caveat distinguishes the cited study's threshold from the report's own conversion-rate assumption", () => {
+  const caveat = BENCHMARKS.speedToLead.caveat ?? "";
+  assert.ok(caveat.length > 0, "speedToLead must carry a caveat");
+  assert.ok(
+    /assumption/i.test(caveat),
+    "caveat must plainly call the specific conversion rates an assumption, not a cited figure"
+  );
+  assert.ok(
+    /not published/i.test(caveat) || /not.{0,20}find/i.test(caveat),
+    "caveat must state the percentages are not something a reader will find in the cited source"
+  );
+});
+
 test("no unreplaced placeholder survives into a shipped benchmark", () => {
   // The scaffold below ships with REPLACE_WITH_* markers on purpose. This test
   // is the thing that stops them reaching a public page, so it must fail until
