@@ -211,3 +211,15 @@ h1, h2, h3, h4 {
 .paper-grain {
   position: relative;
 }
+
+/* ── Print: the results report has to survive being forwarded ── */
+
+@media print {
+  /* The booking embed, nav and the copy-request form are interactive
+     furniture and print as dead space or blank iframes. */
+  .no-print { display: none !important; }
+  /* Findings, contradictions and fixes must not split across a page break
+     mid-item. */
+  .print-keep { break-inside: avoid; }
+  body { background: #fff; }
+}
