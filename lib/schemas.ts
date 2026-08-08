@@ -33,6 +33,27 @@ const utmFields = {
   utmCampaign: z.string().max(255).optional(),
 };
 
+/**
+ * Optional numbers block for the euro leak model (lib/leak.ts). Every field
+ * is individually optional: a visitor can skip the whole block and still get
+ * the full diagnosis, or fill in only some of it.
+ *
+ * Bounds mirror the implausibility ceilings lib/leak.ts already enforces
+ * (MAX_WIN_RATE_PERCENT, MAX_ACV_EUR, MAX_INBOUND_PER_MONTH, MAX_HEADCOUNT),
+ * so this schema and the leak model agree on what counts as a plausible
+ * number instead of validating against one set of bounds and modelling
+ * against another.
+ */
+export const numbersSchema = z.object({
+  acv: z.number().positive().max(10_000_000).optional(),
+  winRate: z.number().positive().max(100).optional(),
+  inboundPerMonth: z.number().positive().max(1_000_000).optional(),
+  responseBucket: z.string().optional(),
+  headcount: z.number().positive().max(10_000).optional(),
+});
+
+export type NumbersInput = z.infer<typeof numbersSchema>;
+
 /** Opt-in schema (funnel step 1). Email + optional first name + UTM. */
 export const optinSchema = z.object({
   email: emailField,
@@ -45,34 +66,77 @@ export const optinSchema = z.object({
     .optional(),
   company: z.string().max(100).trim().optional(),
   answers: z.record(z.string(), z.string()).optional(),
+  /** Cohort question id -> chosen option id (config.quiz.cohort). */
+  cohort: z.record(z.string(), z.string()).optional(),
+  numbers: numbersSchema.optional(),
   ...utmFields,
 });
 
 export type OptinInput = z.infer<typeof optinSchema>;
 
-/** Request body for /api/analyze. Answers are required (we recompute the score). */
+/**
+ * Request body for /api/analyze. Answers are required (we recompute the
+ * score). leadId is optional: the email gate is gone, so a visitor gets the
+ * full diagnosis without identifying themselves.
+ */
 export const analyzeSchema = z.object({
   leadId: z.string().max(60).optional(),
   email: emailField,
   firstName: z.string().max(50).optional(),
   company: z.string().max(100).optional(),
   answers: z.record(z.string(), z.string()),
+  cohort: z.record(z.string(), z.string()).optional(),
+  numbers: numbersSchema.optional(),
 });
 
 export type AnalyzeInput = z.infer<typeof analyzeSchema>;
 
-/** Shape of the AI-generated maturity report (also the structured-output schema). */
+/**
+ * Shape of the AI-generated maturity report (v2; also the structured-output
+ * schema). `version` is a discriminant literal: a later task rejects any
+ * stored report lacking it, so a report cached under the old (v1) shape
+ * regenerates instead of crashing the viewer.
+ *
+ * The model only ever writes prose into this shape. Every fact it carries
+ * (which dimension, which contradiction, which fix and in what order) is
+ * decided by a deterministic module (lib/scoring.ts, lib/contradictions.ts,
+ * lib/fixes.ts) before the model ever sees it; see lib/anthropic.ts.
+ */
 export const reportSchema = z.object({
-  summary: z.string(),
-  dimensions: z.array(
+  version: z.literal(2),
+  /** One or two sentences restating the visitor's inputs before concluding
+   * anything, so they can catch a wrong entry. */
+  readback: z.string(),
+  headline: z.string(),
+  findings: z.array(
     z.object({
-      id: z.string(),
+      dimension: z.string(),
       label: z.string(),
-      verdict: z.string(),
-      recommendation: z.string(),
+      /** The mechanism: what is actually happening, echoing their own answer. */
+      whatsHappening: z.string(),
+      /** The consequence, loss-framed. */
+      whatItsCosting: z.string(),
+      /** Which OTHER dimension this one quietly ceilings. */
+      quietlyCapping: z.string(),
     })
   ),
-  priorities: z.array(z.string()),
+  /** Copied from lib/contradictions.ts's output. The model never invents or
+   * rewrites one of these; see lib/anthropic.ts's SYSTEM prompt. */
+  contradictions: z.array(
+    z.object({ claimA: z.string(), claimB: z.string(), whyItMatters: z.string() })
+  ),
+  /** Order and whyThisPosition are copied from lib/fixes.ts's ranking; only
+   * firstStep is the model's own prose. */
+  fixes: z.array(
+    z.object({
+      order: z.number(),
+      title: z.string(),
+      whyThisPosition: z.string(),
+      firstStep: z.string(),
+    })
+  ),
+  /** Plainly states this is self-reported and triage-level, not validated evidence. */
+  limits: z.string(),
   nextStep: z.string(),
 });
 
