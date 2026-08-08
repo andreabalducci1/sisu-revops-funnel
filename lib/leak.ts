@@ -14,20 +14,32 @@
  * self-report and costs more trust than it wins.
  *
  * Where an input is missing, the dependent line is omitted. It is never
- * rendered as zero, and it is never estimated.
+ * rendered as zero, and it is never estimated. An implausible input (a value
+ * outside a sane real-world range, such as a winRate of 500) is treated the
+ * same as a missing one: the line is omitted, never silently clamped and
+ * re-presented as if the user had actually supplied it.
  *
  * Pure module: no side effects, no module-level mutable state, no imports
  * beyond ./benchmarks. Every euro figure traces back to a Benchmark object
  * (see LeakLine.sources) so a later report view can cite it, caveat and all.
  */
-import { leadToOppRate, BENCHMARKS, WEEKS_PER_YEAR, type Benchmark } from "./benchmarks";
+import {
+  leadToOppRate,
+  BENCHMARKS,
+  WEEKS_PER_YEAR,
+  RESPONSE_BUCKETS,
+  type Benchmark,
+} from "./benchmarks";
 
 export interface LeakInputs {
   acv?: number;
   winRate?: number;
   inboundPerMonth?: number;
-  /** Any string is accepted; an unrecognised value falls back to the slowest
-   * bucket via leadToOppRate, same as benchmarks.ts does for "unknown". */
+  /** Must exactly match one of RESPONSE_BUCKETS' ids to be treated as
+   * present. An empty string, a whitespace-only string, or a value that
+   * matches no known bucket id is treated as absent, so the speed line is
+   * omitted rather than defaulting to a bucket the user never selected
+   * (see computeLeak's hasSpeedInputs check). */
   responseBucket?: string;
   headcount?: number;
 }
@@ -61,6 +73,22 @@ const BEST_BUCKET = "under_5min";
 const DISCLAIMER =
   "A directional estimate from self-reported inputs, not a measurement.";
 
+/** Win rate is a percentage: anything above 100 cannot be real and is most
+ * likely a raw count typed into a percentage field. */
+const MAX_WIN_RATE_PERCENT = 100;
+
+/** Implausible ceiling on a single deal's ACV in EUR. Guards against a
+ * self-report typo, such as a value entered in cents. */
+const MAX_ACV_EUR = 10_000_000;
+
+/** Implausible ceiling on monthly inbound lead volume. Guards against, for
+ * example, a yearly figure typed into a monthly field. */
+const MAX_INBOUND_PER_MONTH = 1_000_000;
+
+/** Implausible ceiling on revenue-team headcount. Guards against, for
+ * example, whole-company headcount typed into a revenue-team-only field. */
+const MAX_HEADCOUNT = 10_000;
+
 /**
  * Hours per week of manual admin drag assumed reclaimable at the lowest
  * possible automation score (0/100), scaling down linearly to 0 at a perfect
@@ -73,8 +101,41 @@ const MAX_RECLAIMABLE_HOURS_PER_WEEK = 5.2;
 
 const eur = (n: number) => `EUR ${Math.round(n).toLocaleString("en-US")}`;
 
+/** Same currency formatting as eur(), but keeps two decimal places instead of
+ * rounding to the nearest euro. Used only inside `workings` strings, and only
+ * for figures (like the hourly rate) whose real value has cents that eur()'s
+ * whole-euro rounding would otherwise hide, letting someone hand-recompute
+ * the printed line and land on a different answer than the printed total.
+ * Never used for a line's overall amount: totals keep whole-euro rounding. */
+const eurPrecise = (n: number) =>
+  `EUR ${n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
 function positive(n: unknown): n is number {
   return typeof n === "number" && Number.isFinite(n) && n > 0;
+}
+
+/**
+ * A stricter positive(): also rejects a value above `max`. Self-reported
+ * numbers that clear an implausible ceiling (a winRate of 500, an ACV typed
+ * in cents) are rejected outright rather than clamped, because a clamped
+ * number would still be presented as if the user had supplied it.
+ */
+function plausible(n: unknown, max: number): n is number {
+  return positive(n) && n <= max;
+}
+
+/** True only for a non-empty, non-whitespace string that exactly matches one
+ * of RESPONSE_BUCKETS' ids. Anything else (undefined, "", "   ", or a value
+ * that matches no known bucket) is treated as absent, not guessed at. */
+function isKnownResponseBucket(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    RESPONSE_BUCKETS.some((b) => b.id === value)
+  );
 }
 
 /** Keeps a corrupted or out-of-range automation score from producing negative
@@ -93,10 +154,10 @@ export function computeLeak(
   const lines: LeakLine[] = [];
 
   const hasSpeedInputs =
-    positive(inputs.acv) &&
-    positive(inputs.winRate) &&
-    positive(inputs.inboundPerMonth) &&
-    typeof inputs.responseBucket === "string";
+    plausible(inputs.acv, MAX_ACV_EUR) &&
+    plausible(inputs.winRate, MAX_WIN_RATE_PERCENT) &&
+    plausible(inputs.inboundPerMonth, MAX_INBOUND_PER_MONTH) &&
+    isKnownResponseBucket(inputs.responseBucket);
 
   let modelledBookings = 0;
 
@@ -129,7 +190,7 @@ export function computeLeak(
   const reclaimablePerWeek = Number.isFinite(clampedScore)
     ? (MAX_RECLAIMABLE_HOURS_PER_WEEK * (100 - clampedScore)) / 100
     : 0;
-  if (positive(inputs.headcount) && reclaimablePerWeek > 0) {
+  if (plausible(inputs.headcount, MAX_HEADCOUNT) && reclaimablePerWeek > 0) {
     const rate = BENCHMARKS.loadedHourly.value;
     const amount = inputs.headcount! * reclaimablePerWeek * WEEKS_PER_YEAR * rate;
     lines.push({
@@ -139,7 +200,9 @@ export function computeLeak(
         `${inputs.headcount} revenue staff x ${reclaimablePerWeek.toFixed(1)} h/wk reclaimable (automation score ${clampedScore}/100)`,
         // Belgian whole-economy figure, not role-specific: stated plainly here
         // rather than papered over, per benchmarks.ts's caveat on this value.
-        `x ${WEEKS_PER_YEAR} wks x ${eur(rate)} Belgian whole-economy loaded hourly (not role-specific) = ${eur(amount)}/yr`,
+        // Printed at full precision (not eur()'s whole-euro rounding) so the
+        // stated arithmetic actually reconciles with the printed total below.
+        `x ${WEEKS_PER_YEAR} wks x ${eurPrecise(rate)} Belgian whole-economy loaded hourly (not role-specific) = ${eur(amount)}/yr`,
       ],
       amount,
       sources: [BENCHMARKS.loadedHourly],

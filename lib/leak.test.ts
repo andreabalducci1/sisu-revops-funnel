@@ -190,16 +190,38 @@ test("workings and disclaimer never contain an em-dash, in an uncapped and a cap
   }
 });
 
-test("an unrecognised response bucket falls back to the slowest bucket rather than guessing up, same as benchmarks.ts", () => {
+// NOTE ON THIS TEST: originally this asserted that an unrecognised response
+// bucket falls back to the slowest bucket (same amount as "over_day"),
+// mirroring benchmarks.ts's leadToOppRate fallback. Task 4 review (Finding 1)
+// identified that as a defect at the computeLeak boundary: silently
+// defaulting to a bucket the user never selected prices a speed line from an
+// input the user never actually gave, contradicting this module's own
+// documented rule that a missing input omits its line rather than being
+// estimated. leadToOppRate's internal "unknown falls back to slowest" logic
+// in benchmarks.ts is unchanged and still correct for its own purpose (it is
+// only ever called here with an already-validated, known bucket id now); the
+// fix is that computeLeak itself validates responseBucket against
+// RESPONSE_BUCKETS before treating it as present at all. Updated to assert
+// the corrected behaviour.
+test("an unrecognised response bucket omits the speed line rather than silently defaulting to the slowest one", () => {
   const r = computeLeak({ ...full, responseBucket: "not_a_real_bucket" }, 33);
-  const asOverDay = computeLeak({ ...full, responseBucket: "over_day" }, 33);
   assert.ok(r);
-  assert.ok(asOverDay);
-  const speed = r.lines.find((l) => l.id === "speed");
-  const speedOverDay = asOverDay.lines.find((l) => l.id === "speed");
-  assert.ok(speed);
-  assert.ok(speedOverDay);
-  assert.equal(speed.amount, speedOverDay.amount);
+  assert.equal(r.lines.find((l) => l.id === "speed"), undefined);
+  assert.ok(r.lines.find((l) => l.id === "drag"));
+});
+
+test("an empty responseBucket omits the speed line rather than being treated as present", () => {
+  const r = computeLeak({ ...full, responseBucket: "" }, 33);
+  assert.ok(r);
+  assert.equal(r.lines.find((l) => l.id === "speed"), undefined);
+  assert.ok(r.lines.find((l) => l.id === "drag"));
+});
+
+test("a whitespace-only responseBucket omits the speed line rather than being treated as present", () => {
+  const r = computeLeak({ ...full, responseBucket: "   " }, 33);
+  assert.ok(r);
+  assert.equal(r.lines.find((l) => l.id === "speed"), undefined);
+  assert.ok(r.lines.find((l) => l.id === "drag"));
 });
 
 test("modelledBookings and ratio are always reported alongside the leak (guard b), even when the leak line list is drag-only", () => {
@@ -216,4 +238,61 @@ test("WEEKS_PER_YEAR from benchmarks.ts drives the drag line, not a private lite
   const drag = r.lines.find((l) => l.id === "drag");
   assert.ok(drag);
   assert.ok(drag.workings.some((w) => w.includes(String(WEEKS_PER_YEAR))));
+});
+
+// --- Finding 2: implausible self-reported values are rejected, not clamped ---
+
+test("a winRate of 500 (an impossible percentage) omits the speed line rather than being clamped and priced anyway", () => {
+  const r = computeLeak({ ...full, winRate: 500 }, 33);
+  assert.ok(r);
+  assert.equal(r.lines.find((l) => l.id === "speed"), undefined);
+  assert.ok(r.lines.find((l) => l.id === "drag"));
+});
+
+test("an acv of 0 omits the speed line: not a plausible deal size", () => {
+  const r = computeLeak({ ...full, acv: 0 }, 33);
+  assert.ok(r);
+  assert.equal(r.lines.find((l) => l.id === "speed"), undefined);
+  assert.ok(r.lines.find((l) => l.id === "drag"));
+});
+
+test("a headcount of 50,000 omits the drag line: not a plausible revenue-team size, while the speed line (unaffected by this bound) still renders", () => {
+  const r = computeLeak({ ...full, headcount: 50_000 }, 33);
+  assert.ok(r);
+  assert.ok(r.lines.find((l) => l.id === "speed"));
+  assert.equal(r.lines.find((l) => l.id === "drag"), undefined);
+});
+
+// --- Finding 3: the drag line's workings print the hourly rate at real precision ---
+
+test("the drag line's workings print the hourly rate at real precision, not eur()'s whole-euro rounding", () => {
+  const r = computeLeak({ headcount: 6 }, 0);
+  assert.ok(r);
+  const drag = r.lines.find((l) => l.id === "drag");
+  assert.ok(drag);
+
+  const rate = BENCHMARKS.loadedHourly.value; // 48.2, sourced from BENCHMARKS, not hardcoded
+  const preciseRate = `EUR ${rate.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`; // "EUR 48.20"
+  // Matches the old, wrong printing ("EUR 48") without also matching the
+  // correct one ("EUR 48.20"), whose "48" is followed by a decimal point.
+  const roundedRatePattern = new RegExp(`EUR ${Math.round(rate)}(?!\\.\\d)`);
+
+  const rateWorking = drag.workings.find((w) => w.includes("loaded hourly"));
+  assert.ok(rateWorking, "no working line mentions the loaded hourly rate");
+  assert.ok(
+    rateWorking!.includes(preciseRate),
+    `expected the rate to print at full precision (${preciseRate}), got: ${rateWorking}`
+  );
+  assert.ok(
+    !roundedRatePattern.test(rateWorking!),
+    "the hourly rate is printed rounded to a whole euro, which no longer reconciles with the printed total"
+  );
+
+  // The line's overall amount still uses whole-euro rounding: this fix only
+  // changes how the rate is printed, never any computed value.
+  const roundedTotal = `EUR ${Math.round(drag.amount).toLocaleString("en-US")}`;
+  assert.ok(drag.workings.some((w) => w.includes(roundedTotal)));
 });
