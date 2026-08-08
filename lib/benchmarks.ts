@@ -164,6 +164,8 @@ export const BENCHMARKS: Record<string, Benchmark> = {
     year: 2011,
     url: "https://hbr.org/2011/03/the-short-life-of-online-sales-leads",
     verified: true,
+    caveat:
+      "The 5-minute threshold itself is well established in the cited 2011 study, but the exact conversion delta behind 'drops sharply' could not be independently confirmed from the primary tables, as the full text is paywalled.",
   },
   loadedHourly: LOADED_HOURLY_EUR,
 };
