@@ -12,6 +12,7 @@ const DIM_FIELD: Record<string, string> = {
   automation: "Score Automation",
   reporting: "Score Reporting",
   stack: "Score Stack",
+  ai: "Score AI Readiness",
 };
 
 /**
@@ -32,7 +33,14 @@ export async function GET() {
     const stored = rec?.fields?.["Report"];
     if (typeof stored !== "string" || !stored) return errors.notFound("No stored report");
 
-    const report = JSON.parse(stored) as Report;
+    const parsed = JSON.parse(stored) as unknown;
+    const report =
+      parsed && typeof parsed === "object" && "report" in parsed
+        ? (parsed as { report: Report }).report
+        : (parsed as Report);
+    // Pre-v2 rows have no version and cannot render in the new viewer.
+    if (report?.version !== 2) return errors.notFound("No stored report");
+
     const score = {
       overall: Number(rec?.fields?.["Maturity Score"] ?? 0),
       band: String(rec?.fields?.["Maturity Band"] ?? ""),

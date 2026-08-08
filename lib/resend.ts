@@ -21,18 +21,40 @@ function reportEmailHtml(report: Report, score: ScoreResult, firstName?: string)
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
   const bookUrl = `${siteUrl}/book`;
   const greeting = firstName ? `Hi ${firstName},` : "Hi,";
-  const priorities = report.priorities
-    .map((p) => `<li style="margin-bottom:8px;">${p}</li>`)
+
+  const findings = report.findings
+    .map(
+      (f) => `
+    <li style="margin-bottom:14px;">
+      <strong>${f.label}:</strong> ${f.whatsHappening}
+      <br /><span style="color:#474747;">${f.whatItsCosting}</span>
+      <br /><span style="color:#8a8a8a;font-size:13px;">Also holds back: ${f.quietlyCapping}</span>
+    </li>`
+    )
     .join("");
+
+  const fixes = report.fixes
+    .map(
+      (f) => `
+    <li style="margin-bottom:14px;">
+      <strong>${f.title}</strong>
+      <br /><span style="color:#474747;">Start here: ${f.firstStep}</span>
+    </li>`
+    )
+    .join("");
+
   return `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#1c1c1c;background:#f4f1ec;padding:32px 24px;">
     <p style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#5a88b8;margin:0 0 8px;">RevOps maturity report</p>
     <h1 style="font-size:26px;margin:0 0 4px;color:#1c1c1c;">${score.overall} / 100</h1>
     <p style="margin:0 0 20px;color:#474747;">${score.band}</p>
-    <p style="margin:0 0 16px;">${greeting}</p>
-    <p style="margin:0 0 20px;line-height:1.6;">${report.summary}</p>
-    <p style="font-weight:600;margin:0 0 8px;">Fix these first:</p>
-    <ol style="margin:0 0 24px;padding-left:20px;line-height:1.5;">${priorities}</ol>
+    <p style="margin:0 0 8px;">${greeting}</p>
+    <p style="margin:0 0 20px;line-height:1.6;">${report.readback}</p>
+    <p style="font-weight:600;font-size:18px;margin:0 0 16px;">${report.headline}</p>
+    <p style="font-weight:600;margin:0 0 8px;">What is going on:</p>
+    <ul style="margin:0 0 24px;padding-left:20px;line-height:1.5;">${findings}</ul>
+    <p style="font-weight:600;margin:0 0 8px;">Fix these first, in order:</p>
+    <ol style="margin:0 0 24px;padding-left:20px;line-height:1.5;">${fixes}</ol>
     <p style="margin:24px 0;">
       <a href="${bookUrl}"
          style="background:#1c1c1c;color:#f4f1ec;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;display:inline-block;">
@@ -40,6 +62,7 @@ function reportEmailHtml(report: Report, score: ScoreResult, firstName?: string)
       </a>
     </p>
     <p style="color:#474747;font-size:14px;margin-top:24px;">${report.nextStep}</p>
+    <p style="color:#9a9a9a;font-size:12px;margin-top:16px;">${report.limits}</p>
     <p style="color:#474747;font-size:13px;margin-top:24px;">${config.legal.companyName}</p>
   </div>`;
 }

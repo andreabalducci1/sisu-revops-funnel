@@ -25,6 +25,7 @@ function scoreFields(score: ScoreResult): Partial<LeadFields> {
     "Score Automation": byId("automation"),
     "Score Reporting": byId("reporting"),
     "Score Stack": byId("stack"),
+    "Score AI Readiness": byId("ai"),
   };
 }
 

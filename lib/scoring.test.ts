@@ -52,3 +52,98 @@ test("a missing answer counts as 0", () => {
   // dim A = 100, dim B = 0 -> overall = 50
   assert.equal(r.overall, 50);
 });
+
+const quizWithUnknown: QuizModel = {
+  dimensions: [{ id: "a", label: "A", weight: 100 }],
+  questions: [
+    {
+      id: "q1",
+      dimension: "a",
+      options: [
+        { id: "hi", score: 100 },
+        { id: "x", score: 0, unknown: true },
+      ],
+    },
+    {
+      id: "q2",
+      dimension: "a",
+      options: [
+        { id: "hi", score: 100 },
+        { id: "x", score: 0, unknown: true },
+      ],
+    },
+  ],
+  bands: [
+    { min: 0, max: 49, label: "Low", teaser: "low" },
+    { min: 50, max: 100, label: "High", teaser: "high" },
+  ],
+};
+
+test("unknown scores zero and is counted", () => {
+  const r = scoreQuiz({ q1: "hi", q2: "x" }, quizWithUnknown);
+  assert.equal(r.overall, 50);
+  assert.equal(r.unknownCount, 1);
+  assert.equal(r.dimensions[0].unknownCount, 1);
+});
+
+test("a zero-scoring option is not counted as unknown", () => {
+  const q: QuizModel = {
+    dimensions: [{ id: "a", label: "A", weight: 1 }],
+    questions: [
+      {
+        id: "q1",
+        dimension: "a",
+        options: [
+          { id: "good", score: 100 },
+          { id: "bad", score: 0 },
+        ],
+      },
+      {
+        id: "q2",
+        dimension: "a",
+        options: [
+          { id: "good", score: 100 },
+          { id: "unsure", score: 0, unknown: true },
+        ],
+      },
+    ],
+    bands: [
+      { min: 0, max: 49, label: "Low", teaser: "low" },
+      { min: 50, max: 100, label: "High", teaser: "high" },
+    ],
+  };
+  const r = scoreQuiz({ q1: "bad", q2: "unsure" }, q);
+  assert.equal(r.overall, 0);
+  assert.equal(r.unknownCount, 1);
+  assert.equal(r.dimensions[0].unknownCount, 1);
+});
+
+test("weights need not be fractions and are normalised", () => {
+  const q: QuizModel = {
+    dimensions: [
+      { id: "a", label: "A", weight: 75 },
+      { id: "b", label: "B", weight: 25 },
+    ],
+    questions: [
+      { id: "qa", dimension: "a", options: [{ id: "hi", score: 100 }] },
+      { id: "qb", dimension: "b", options: [{ id: "lo", score: 0 }] },
+    ],
+    bands: [{ min: 0, max: 100, label: "Any", teaser: "" }],
+  };
+  assert.equal(scoreQuiz({ qa: "hi", qb: "lo" }, q).overall, 75);
+});
+
+test("band boundaries are inclusive at both ends", () => {
+  const q: QuizModel = {
+    dimensions: [{ id: "a", label: "A", weight: 1 }],
+    questions: [
+      { id: "qa", dimension: "a", options: [{ id: "v34", score: 34 }, { id: "v35", score: 35 }] },
+    ],
+    bands: [
+      { min: 0, max: 34, label: "Lower", teaser: "" },
+      { min: 35, max: 100, label: "Upper", teaser: "" },
+    ],
+  };
+  assert.equal(scoreQuiz({ qa: "v34" }, q).band, "Lower");
+  assert.equal(scoreQuiz({ qa: "v35" }, q).band, "Upper");
+});

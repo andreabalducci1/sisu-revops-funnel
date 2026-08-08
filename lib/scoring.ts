@@ -9,6 +9,8 @@
 export interface QuizOption {
   id: string;
   score: number;
+  /** Marks a "Not sure" style answer. Counted separately as unmeasured rather than bad. Typically scores 0 by config convention. */
+  unknown?: boolean;
 }
 export interface QuizQuestion {
   id: string;
@@ -39,34 +41,43 @@ export interface DimensionScore {
   id: string;
   label: string;
   score: number;
+  /** Count of "Not sure" answers in this dimension. Unmeasured, not bad. */
+  unknownCount: number;
 }
 export interface ScoreResult {
   overall: number;
   band: string;
   bandTeaser: string;
   dimensions: DimensionScore[];
+  /** Total "Not sure" answers across all dimensions. */
+  unknownCount: number;
 }
 
-function optionScore(question: QuizQuestion, answers: Answers): number {
-  const chosen = answers[question.id];
-  const option = question.options.find((o) => o.id === chosen);
-  return option ? option.score : 0;
+function chosenOption(question: QuizQuestion, answers: Answers): QuizOption | undefined {
+  return question.options.find((o) => o.id === answers[question.id]);
 }
 
 /**
  * Score a set of answers against a quiz model.
  * Dimension score = average of its questions' chosen option scores.
- * Overall = weighted average of dimension scores (weights normalized).
+ * Overall = weighted average of dimension scores (weights normalized, so
+ * integer weights that sum to 100, or to anything else, work the same way).
+ * "Not sure" answers score 0 like any unanswered question, but are also
+ * counted separately so the report can say "unmeasured" rather than "bad".
  */
 export function scoreQuiz(answers: Answers, quiz: QuizModel): ScoreResult {
   const dimensions: DimensionScore[] = quiz.dimensions.map((dim) => {
     const questions = quiz.questions.filter((q) => q.dimension === dim.id);
-    const avg =
-      questions.length === 0
-        ? 0
-        : questions.reduce((sum, q) => sum + optionScore(q, answers), 0) /
-          questions.length;
-    return { id: dim.id, label: dim.label, score: Math.round(avg) };
+    let sum = 0;
+    let unknownCount = 0;
+    for (const q of questions) {
+      const opt = chosenOption(q, answers);
+      // An unanswered or unrecognised question scores 0, same as "Not sure".
+      sum += opt ? opt.score : 0;
+      if (opt?.unknown) unknownCount += 1;
+    }
+    const avg = questions.length === 0 ? 0 : sum / questions.length;
+    return { id: dim.id, label: dim.label, score: Math.round(avg), unknownCount };
   });
 
   const totalWeight = quiz.dimensions.reduce((s, d) => s + d.weight, 0) || 1;
@@ -85,5 +96,6 @@ export function scoreQuiz(answers: Answers, quiz: QuizModel): ScoreResult {
     band: band ? band.label : "",
     bandTeaser: band ? band.teaser : "",
     dimensions,
+    unknownCount: dimensions.reduce((s, d) => s + d.unknownCount, 0),
   };
 }
