@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { detectContradictions } from "./contradictions";
+import { detectContradictions, RULE_CONFIG_REFS } from "./contradictions";
+import config from "../config";
 
 // --- Brief's test list (verbatim) ---
 
@@ -165,4 +166,26 @@ test("genuinely present and recognised speeds that differ produce exactly one fl
   assert.equal(c.length, 1);
   assert.equal(c[0].id, "speed_self_conflict");
   assert.ok(c[0].whyItMatters.length > 0);
+});
+
+// --- config drift guard ---
+// Every rule references question ids and option ids from config.ts as bare
+// string literals. If config.ts is edited and an id changes or a typo is
+// introduced into RULE_CONFIG_REFS, the affected rule would silently stop
+// firing forever: no type error, no other test failure. This test looks up
+// every pair contradictions.ts claims to depend on against the real
+// config.ts, so that drift (or a typo in a newly added rule) fails loudly
+// here instead.
+
+test("every rule's config.ts (questionId, optionId) reference still exists", () => {
+  assert.ok(RULE_CONFIG_REFS.length > 0);
+  for (const { questionId, optionId } of RULE_CONFIG_REFS) {
+    const question = config.quiz.questions.find((q) => q.id === questionId);
+    assert.ok(question, `question id "${questionId}" not found in config.ts`);
+    const option = question?.options.find((o) => o.id === optionId);
+    assert.ok(
+      option,
+      `option id "${optionId}" not found on question "${questionId}" in config.ts`
+    );
+  }
 });

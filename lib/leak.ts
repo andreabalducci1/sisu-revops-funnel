@@ -27,7 +27,7 @@ import {
   leadToOppRate,
   BENCHMARKS,
   WEEKS_PER_YEAR,
-  RESPONSE_BUCKETS,
+  isKnownResponseBucket,
   type Benchmark,
 } from "./benchmarks";
 
@@ -125,17 +125,6 @@ function positive(n: unknown): n is number {
  */
 function plausible(n: unknown, max: number): n is number {
   return positive(n) && n <= max;
-}
-
-/** True only for a non-empty, non-whitespace string that exactly matches one
- * of RESPONSE_BUCKETS' ids. Anything else (undefined, "", "   ", or a value
- * that matches no known bucket) is treated as absent, not guessed at. */
-function isKnownResponseBucket(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    value.trim().length > 0 &&
-    RESPONSE_BUCKETS.some((b) => b.id === value)
-  );
 }
 
 /** Keeps a corrupted or out-of-range automation score from producing negative

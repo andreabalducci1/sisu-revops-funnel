@@ -13,7 +13,7 @@
  */
 import type { Answers } from "./scoring";
 import type { LeakInputs } from "./leak";
-import { RESPONSE_BUCKETS } from "./benchmarks";
+import { isKnownResponseBucket } from "./benchmarks";
 
 export interface Contradiction {
   id: string;
@@ -31,27 +31,16 @@ interface Rule {
   whyItMatters: string;
 }
 
-/**
- * True only for a non-empty, non-whitespace string that exactly matches one of
- * RESPONSE_BUCKETS' ids (over_day, same_day, under_hour, under_5min).
- *
- * Both sides of the speed_self_conflict rule route through this same check:
- * - the numbers block's responseBucket, per lib/leak.ts's isKnownResponseBucket
- *   convention: an empty, whitespace-only, or unrecognised value means the
- *   field was left blank, not that it holds a slow answer.
- * - the quiz's q_automation_speed answer, where "x" ("We do not measure it")
- *   is the unknown option, not a real speed.
- * Either side failing this check means the datum is absent, so the rule below
- * treats it as missing data and does not fire. Missing data is never treated
- * as a contradiction.
- */
-function isRecognisedSpeedBucket(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    value.trim().length > 0 &&
-    RESPONSE_BUCKETS.some((b) => b.id === value)
-  );
-}
+// Both sides of the speed_self_conflict rule route through the shared
+// isKnownResponseBucket (lib/benchmarks.ts) check:
+// - the numbers block's responseBucket: an empty, whitespace-only, or
+//   unrecognised value means the field was left blank, not that it holds a
+//   slow answer.
+// - the quiz's q_automation_speed answer, where "x" ("We do not measure it")
+//   is the unknown option, not a real speed.
+// Either side failing this check means the datum is absent, so the rule below
+// treats it as missing data and does not fire. Missing data is never treated
+// as a contradiction.
 
 const RULES: Rule[] = [
   {
@@ -75,7 +64,7 @@ const RULES: Rule[] = [
     claimA: "You have end to end attribution",
     claimB: "You do not measure time to first contact",
     whyItMatters:
-      "Attribution blind to first-touch latency is missing its most actionable variable. You can see which channel produced a deal but not why the others did not.",
+      "Attribution that cannot see how fast a lead was contacted is missing a variable that strongly affects the outcome it is attributing. Two channels can look different in performance when the real difference was response time, not source quality.",
   },
   {
     id: "ai_vs_knowledge",
@@ -107,13 +96,13 @@ const RULES: Rule[] = [
     // from lib/benchmarks.ts (over_day, same_day, under_hour, under_5min),
     // the same vocabulary the numbers block's responseBucket field uses. Only
     // fires when both sides are present, recognised, and different: see
-    // isRecognisedSpeedBucket above for why blank or unknown values do not
+    // isKnownResponseBucket above for why blank or unknown values do not
     // count as a conflict.
     when: (a, n) => {
       if (!n) return false;
       return (
-        isRecognisedSpeedBucket(n.responseBucket) &&
-        isRecognisedSpeedBucket(a.q_automation_speed) &&
+        isKnownResponseBucket(n.responseBucket) &&
+        isKnownResponseBucket(a.q_automation_speed) &&
         n.responseBucket !== a.q_automation_speed
       );
     },
@@ -122,6 +111,42 @@ const RULES: Rule[] = [
     whyItMatters:
       "These two do not match. Worth resolving before either figure gets used, because the euro estimate is built on the second one.",
   },
+];
+
+export interface ConfigRef {
+  questionId: string;
+  optionId: string;
+}
+
+/**
+ * Every (questionId, optionId) pair the RULES above compare an answer
+ * against as a bare string literal from config.ts. Plain data, kept right
+ * beside RULES so it is obvious it must gain an entry whenever a rule gains
+ * one: a rule that references a new config.ts id without adding it here is
+ * exactly the drift this list exists to catch (see contradictions.test.ts,
+ * which looks each pair up against the real config.ts).
+ *
+ * This module still does not import config.ts itself: the pairs below are
+ * just strings, checked against the real config only by the test.
+ *
+ * speed_self_conflict is intentionally absent: it does not compare against a
+ * fixed config.ts option literal, it compares two live values against each
+ * other, each validated separately against RESPONSE_BUCKETS in
+ * lib/benchmarks.ts via isKnownResponseBucket. Its question id,
+ * q_automation_speed, is still covered below via the other rules that do
+ * reference it (attribution_vs_speed, speed_vs_handoff).
+ */
+export const RULE_CONFIG_REFS: ReadonlyArray<ConfigRef> = [
+  { questionId: "q_pipeline_forecast", optionId: "d" },
+  { questionId: "q_data_records", optionId: "a" },
+  { questionId: "q_data_records", optionId: "b" },
+  { questionId: "q_reporting_channels", optionId: "d" },
+  { questionId: "q_automation_speed", optionId: "x" },
+  { questionId: "q_ai_attempts", optionId: "d" },
+  { questionId: "q_ai_knowledge", optionId: "a" },
+  { questionId: "q_ai_knowledge", optionId: "b" },
+  { questionId: "q_automation_speed", optionId: "under_5min" },
+  { questionId: "q_automation_handoff", optionId: "a" },
 ];
 
 export function detectContradictions(

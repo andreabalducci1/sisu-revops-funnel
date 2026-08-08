@@ -116,6 +116,26 @@ export const RESPONSE_BUCKETS = [
 export type ResponseBucket = (typeof RESPONSE_BUCKETS)[number]["id"] | "unknown";
 
 /**
+ * True only for a non-empty, non-whitespace string that exactly matches one
+ * of RESPONSE_BUCKETS' ids (over_day, same_day, under_hour, under_5min).
+ * Anything else (undefined, "", "   ", or a value that matches no known
+ * bucket) is treated as absent, not guessed at.
+ *
+ * Shared by lib/leak.ts (the numbers block's responseBucket field) and
+ * lib/contradictions.ts (both the numbers block's responseBucket and the
+ * quiz's q_automation_speed answer, whose option ids are this same
+ * vocabulary) so "is this a real response bucket" has exactly one
+ * definition instead of two copies that can drift apart.
+ */
+export function isKnownResponseBucket(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    RESPONSE_BUCKETS.some((b) => b.id === value)
+  );
+}
+
+/**
  * Conversion rate by response speed. Deliberately conservative: the spread
  * between slowest and fastest is 5 points, at the low end of what the source
  * range permits, because this figure is multiplied by three other user numbers
