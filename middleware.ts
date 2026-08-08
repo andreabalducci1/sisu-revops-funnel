@@ -2,21 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Funnel gating by cookie:
- *  - /report requires the opt-in cookie (else -> back to landing)
  *  - /thanks requires the booking cookie (else -> back to /book)
  *
- * This is a real UX gate that mirrors the funnel flow. To test freely,
- * walk the funnel from the start.
+ * /report is deliberately ungated. The diagnosis is the product now, and the
+ * booking is the conversion. Gating it here would bounce every visitor,
+ * because tunnel_optin is only set by the (now optional) email capture.
  */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
-  if (pathname.startsWith("/report")) {
-    const optin = req.cookies.get("tunnel_optin");
-    if (!optin?.value) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-  }
 
   if (pathname.startsWith("/thanks")) {
     const booking = req.cookies.get("tunnel_booking");
@@ -29,5 +22,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/report/:path*", "/thanks/:path*"],
+  matcher: ["/thanks/:path*"],
 };

@@ -48,6 +48,7 @@ export interface LeadFields {
   "Score Automation"?: number;
   "Score Reporting"?: number;
   "Score Stack"?: number;
+  "Score AI Readiness"?: number;
   "Quiz Answers"?: string;
   Report?: string;
   "Report Generated At"?: string;
