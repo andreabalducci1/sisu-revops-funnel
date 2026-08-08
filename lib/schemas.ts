@@ -38,18 +38,23 @@ const utmFields = {
  * is individually optional: a visitor can skip the whole block and still get
  * the full diagnosis, or fill in only some of it.
  *
- * Bounds mirror the implausibility ceilings lib/leak.ts already enforces
- * (MAX_WIN_RATE_PERCENT, MAX_ACV_EUR, MAX_INBOUND_PER_MONTH, MAX_HEADCOUNT),
- * so this schema and the leak model agree on what counts as a plausible
- * number instead of validating against one set of bounds and modelling
- * against another.
+ * This schema is deliberately permissive: it only enforces "a real number,
+ * not negative" (nonnegative, so 0 is accepted; a truthful "0 leads this
+ * month" answer must never fail validation and take the whole request down
+ * with it). It does NOT enforce an upper bound. Implausibility ceilings
+ * (MAX_WIN_RATE_PERCENT, MAX_ACV_EUR, MAX_INBOUND_PER_MONTH, MAX_HEADCOUNT)
+ * live only in lib/leak.ts's plausible(), which omits the dependent line for
+ * an out-of-range value instead of rejecting the request. Rejecting here
+ * would make that graceful downstream path unreachable: the whole diagnosis
+ * would 400 over one implausible field instead of just dropping that field's
+ * euro line.
  */
 export const numbersSchema = z.object({
-  acv: z.number().positive().max(10_000_000).optional(),
-  winRate: z.number().positive().max(100).optional(),
-  inboundPerMonth: z.number().positive().max(1_000_000).optional(),
+  acv: z.number().nonnegative().optional(),
+  winRate: z.number().nonnegative().optional(),
+  inboundPerMonth: z.number().nonnegative().optional(),
   responseBucket: z.string().optional(),
-  headcount: z.number().positive().max(10_000).optional(),
+  headcount: z.number().nonnegative().optional(),
 });
 
 export type NumbersInput = z.infer<typeof numbersSchema>;

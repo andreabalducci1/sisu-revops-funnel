@@ -149,6 +149,12 @@ export function MaturityQuiz() {
   const quizCompleteRef = useRef(false);
   const numbersResolvedRef = useRef(false);
 
+  // Set only when /api/analyze fails (network error, non-2xx, or an ok:false
+  // body). Rendered on the numbers step so the visitor's answers are never
+  // lost and they can just retry, instead of being routed to /report as if
+  // the call had actually succeeded.
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
   const cohortQuestions = quiz.cohort;
   const currentCohort = cohortQuestions[cohortIndex];
 
@@ -219,8 +225,20 @@ export function MaturityQuiz() {
     }
   }
 
+  /**
+   * Calls /api/analyze and only ever navigates to /report on a genuine
+   * success. A validation failure (400), a server error (500), or a network
+   * exception must never look like a completed diagnosis: previously this
+   * function pushed to /report unconditionally, so a rejected request (for
+   * example the numbers-schema bug that used to reject a truthful 0) landed
+   * the visitor on /report's empty state ("Your report has moved on"), which
+   * reads as if their answers were lost. Now a failure keeps them on the
+   * numbers step, with their answers and numbers form intact, and an inline
+   * message so they can just retry.
+   */
   async function runAnalysis(numbers: LeakInputs | undefined) {
     setStep("analyzing");
+    setAnalysisError(null);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -228,30 +246,36 @@ export function MaturityQuiz() {
         body: JSON.stringify({ answers, cohort, numbers }),
       });
       const json = await res.json();
-      if (json.ok && json.data?.report) {
-        sessionStorage.setItem(
-          STASH_KEY,
-          JSON.stringify({
-            report: json.data.report,
-            score: json.data.score,
-            leak: json.data.leak ?? null,
-            contradictions: json.data.contradictions ?? [],
-            fixes: json.data.fixes ?? [],
-            cohort,
-            firstName: undefined,
-            // Raw inputs, not returned by /api/analyze itself. Kept so the
-            // results page can regenerate and email a copy of this same
-            // report later without asking the visitor to redo the quiz; see
-            // ReportViewer's requestCopy.
-            answers,
-            numbers,
-          })
-        );
+      if (!res.ok || !json.ok || !json.data?.report) {
+        track(FUNNEL_EVENTS.ANALYSIS_ERROR);
+        setAnalysisError(json?.error?.message || config.ui.genericError);
+        setStep("numbers");
+        return;
       }
+      sessionStorage.setItem(
+        STASH_KEY,
+        JSON.stringify({
+          report: json.data.report,
+          score: json.data.score,
+          leak: json.data.leak ?? null,
+          contradictions: json.data.contradictions ?? [],
+          fixes: json.data.fixes ?? [],
+          cohort,
+          firstName: undefined,
+          // Raw inputs, not returned by /api/analyze itself. Kept so the
+          // results page can regenerate and email a copy of this same
+          // report later without asking the visitor to redo the quiz; see
+          // ReportViewer's requestCopy.
+          answers,
+          numbers,
+        })
+      );
+      router.push("/report");
     } catch {
-      // fall through: /report shows a graceful fallback
+      track(FUNNEL_EVENTS.ANALYSIS_ERROR);
+      setAnalysisError(config.ui.networkError);
+      setStep("numbers");
     }
-    router.push("/report");
   }
 
   function skipNumbers() {
@@ -508,6 +532,12 @@ export function MaturityQuiz() {
               {quiz.numbers.skipCta}
             </button>
           </div>
+
+          {analysisError && (
+            <p style={{ color: "#b91c1c", fontSize: "0.9rem", marginTop: "1rem" }}>
+              {analysisError} Your answers are still here, so you can just try again.
+            </p>
+          )}
         </div>
       </section>
     );
