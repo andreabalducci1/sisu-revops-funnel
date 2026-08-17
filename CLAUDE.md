@@ -9,7 +9,7 @@ Landing (quiz)  ->  Report  ->  Book (Cal.com)  ->  Thanks
    /                /report      /book             /thanks
 ```
 
-The offer at the end (leaning a "Claude Code for RevOps" bootcamp) is still being finalized. The funnel is built **product-agnostic**: all offer copy lives in `config.ts` and can change without touching components.
+The offer at the end is a SiSu RevOps consulting/audit engagement (confirmed 2026-08-13; see `PRODUCT.md`). The funnel is built **product-agnostic**: all offer copy lives in `config.ts` and can change without touching components.
 
 ## Architecture
 

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14",
+  "title": "Design System: SiSu RevOps Funnel",
+  "extensions": {
+    "colorMeta": {
+      "deep-charcoal": { "role": "primary", "displayName": "Deep Charcoal", "canonical": "#1c1c1c", "tonalRamp": ["oklch(15% 0 0)", "oklch(26% 0 0)", "oklch(37% 0 0)", "oklch(48% 0 0)", "oklch(59% 0 0)", "oklch(70% 0 0)", "oklch(81% 0 0)", "oklch(93% 0 0)"] },
+      "muted-sage": { "role": "secondary", "displayName": "Muted Sage", "canonical": "#7e8f83", "tonalRamp": ["oklch(20% 0.03 155)", "oklch(31% 0.03 155)", "oklch(42% 0.03 155)", "oklch(53% 0.03 155)", "oklch(62% 0.03 155)", "oklch(73% 0.03 155)", "oklch(84% 0.03 155)", "oklch(94% 0.02 155)"] },
+      "dusty-blue-grey": { "role": "secondary", "displayName": "Dusty Blue-Grey", "canonical": "#5a88b8", "tonalRamp": ["oklch(20% 0.07 255)", "oklch(30% 0.08 255)", "oklch(40% 0.08 255)", "oklch(50% 0.08 255)", "oklch(60% 0.08 255)", "oklch(72% 0.07 255)", "oklch(83% 0.05 255)", "oklch(94% 0.02 255)"] },
+      "warm-ivory": { "role": "neutral", "displayName": "Warm Ivory", "canonical": "#f4f1ec", "tonalRamp": ["oklch(25% 0.01 90)", "oklch(37% 0.01 90)", "oklch(49% 0.012 90)", "oklch(61% 0.014 90)", "oklch(73% 0.015 90)", "oklch(84% 0.012 90)", "oklch(91% 0.01 90)", "oklch(96% 0.008 90)"] },
+      "sand": { "role": "neutral", "displayName": "Sand", "canonical": "#e3dcd0", "tonalRamp": ["oklch(24% 0.015 90)", "oklch(35% 0.018 90)", "oklch(46% 0.02 90)", "oklch(57% 0.022 90)", "oklch(68% 0.022 90)", "oklch(78% 0.02 90)", "oklch(89% 0.018 90)", "oklch(95% 0.01 90)"] },
+      "card-ivory": { "role": "neutral", "displayName": "Card Ivory", "canonical": "#f8f6f1" },
+      "soft-sand": { "role": "neutral", "displayName": "Soft Sand", "canonical": "#e9e3d8" },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#ddd6cb" },
+      "soft-ink": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#474747" },
+      "charcoal-hover": { "role": "primary", "displayName": "Charcoal Hover", "canonical": "#2a2a2a" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Serif", "purpose": "All h1-h4. Sentence case only; italic (never weight) carries emphasis, including the signature italic counter-clause." },
+      "body": { "displayName": "Body Sans", "purpose": "All running copy at 17px/1.7, ~65ch measure." },
+      "label": { "displayName": "Eyebrow", "purpose": "Uppercase 12px section label in Dusty Blue-Grey, one line above its heading. The only uppercase voice." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-editorial", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "The only easing. Soft entrance, no overshoot." },
+      { "name": "reveal-up", "value": "0.6s ease-editorial, opacity 0 + translateY(14px) to rest, stagger ~0.11s", "purpose": "The single signature entrance animation; collapses to static under prefers-reduced-motion." },
+      { "name": "state-transition", "value": "0.18s ease", "purpose": "Button and link state changes (background, color)." }
+    ],
+    "breakpoints": [
+      { "name": "funnel-collapse", "value": "860px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Matte charcoal block on ivory; the loudest element on any screen.",
+      "html": "<button class=\"ds-btn-primary\">See my maturity score</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--color-primary, #1c1c1c); color: var(--color-bg, #f4f1ec); font-family: 'DM Sans', system-ui, sans-serif; font-weight: 500; font-size: 1rem; padding: 0.85rem 1.6rem; border-radius: 8px; border: none; cursor: pointer; transition: background 0.18s ease; } .ds-btn-primary:hover { background: var(--color-primary-dark, #2a2a2a); } .ds-btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Quiet secondary action; inverts to charcoal on hover.",
+      "html": "<button class=\"ds-btn-outline\">Back to site</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; color: var(--color-ink, #1c1c1c); font-family: 'DM Sans', system-ui, sans-serif; font-weight: 500; font-size: 1rem; padding: 0.8rem 1.4rem; border-radius: 8px; border: 1.5px solid var(--color-ink, #1c1c1c); cursor: pointer; transition: background 0.18s ease, color 0.18s ease; } .ds-btn-outline:hover { background: var(--color-ink, #1c1c1c); color: var(--color-bg, #f4f1ec); }"
+    },
+    {
+      "name": "Surface Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Matte paper card: slight tonal lift, hairline border, strictly no shadow.",
+      "html": "<div class=\"ds-surface-card\"><h3 class=\"ds-card-title\">Data hygiene</h3><p class=\"ds-card-body\">Your CRM has three fields nobody fills in, and one report everybody distrusts.</p></div>",
+      "css": ".ds-surface-card { background: var(--color-surface, #f8f6f1); border: 1px solid var(--color-line, #ddd6cb); border-radius: 8px; padding: 1.5rem; max-width: 340px; } .ds-card-title { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.1; color: var(--color-ink, #1c1c1c); margin: 0 0 0.5rem; } .ds-card-body { font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.95rem; line-height: 1.7; color: var(--color-ink-soft, #474747); margin: 0; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "chip",
+      "refersTo": "label",
+      "description": "Uppercase Dusty Blue-Grey section label; the only uppercase voice in the system.",
+      "html": "<span class=\"ds-eyebrow\">The problem</span>",
+      "css": ".ds-eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-eyebrow, #5a88b8); }"
+    },
+    {
+      "name": "Underline Link",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Prose link with the signature scale-in underline on hover.",
+      "html": "<a href=\"#\" class=\"ds-link-underline\">How the score works</a>",
+      "css": ".ds-link-underline { position: relative; color: var(--color-link, #5a88b8); font-family: 'DM Sans', system-ui, sans-serif; font-weight: 500; text-decoration: none; } .ds-link-underline::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 100%; height: 1.5px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease; } .ds-link-underline:hover::after { transform: scaleX(1); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Paper Diagnosis",
+    "overview": "Every surface in this funnel reads like a candid consultant's report printed on good paper. The ground is Warm Ivory, the ink is Deep Charcoal, and nothing shines: no shadows, no gradients, no glass. Authority comes from typography (an editorial serif for headlines, a plain humanist sans for everything else) and from restraint: color appears only where it carries meaning. The product is a diagnostic, and the design behaves like one: matte, precise, unhurried.",
+    "keyCharacteristics": [
+      "No pure white, no pure black; the whole world lives between ivory (#f4f1ec) and charcoal (#1c1c1c).",
+      "Completely flat: zero drop shadows; depth is tonal (ivory, card, sand) plus hairline borders.",
+      "One radius (8px) everywhere; no pills, no sharp corners.",
+      "Serif display type in sentence case, with the italic counter-clause as the signature typographic move.",
+      "Two accents only, used sparingly: Muted Sage for warmth and affirmation, Dusty Blue-Grey for eyebrows and prose links.",
+      "One signature motion: a soft reveal-up on load; nothing bouncy, ever."
+    ],
+    "rules": [
+      { "name": "The No Pure White Rule", "body": "#ffffff and #000000 do not exist on screen. The lightest value is Card Ivory, the darkest is Deep Charcoal. The single exception is the print stylesheet, where the body goes white for paper.", "section": "colors" },
+      { "name": "The Two Accents Rule", "body": "Sage affirms, Dusty Blue labels and links. Neither ever exceeds a small fraction of a screen, and neither is a text color for body copy.", "section": "colors" },
+      { "name": "The Italic Counter-Clause Rule", "body": "Two-part headlines set the counter-clause in italic. This is the brand's signature typographic move; new headlines should look for the opportunity.", "section": "typography" },
+      { "name": "The Sentence Case Rule", "body": "Headlines are sentence case. Never Title Case, never ALL CAPS (the 12px eyebrow is the sole uppercase voice).", "section": "typography" },
+      { "name": "The Flat Paper Rule", "body": "No drop shadows, ever, in any state. If an element needs separation, it gets a tonal fill or a hairline border, not a shadow.", "section": "elevation" },
+      { "name": "The One Reveal Rule", "body": "One signature entrance: reveal-up over 0.6s with cubic-bezier(0.22, 1, 0.36, 1), staggered ~0.11s. No bounce, no overshoot, no parallax. prefers-reduced-motion collapses everything to static.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep every background ivory-family and every text charcoal-family.",
+      "Do use italic (not weight) for emphasis in headlines.",
+      "Do use the eyebrow + serif headline pattern to open sections.",
+      "Do keep the report printable: test new report elements against the print stylesheet.",
+      "Do write microcopy in the brand voice: problem-first, plain, radically candid, dot-separated qualifiers (\"Free · No pitch\")."
+    ],
+    "donts": [
+      "Don't use drop shadows, gradients, glassmorphism, or pure white/black.",
+      "Don't use purple-indigo AI-default palettes or emoji clusters.",
+      "Don't use em or en dashes anywhere, including generated copy; restructure or use a single hyphen.",
+      "Don't introduce new accent colors, new radii, or bouncy animation.",
+      "Don't use the banned vocabulary: supercharge, unleash, game-changer, leverage, synergy, ecosystem, 10x."
+    ]
+  }
+}

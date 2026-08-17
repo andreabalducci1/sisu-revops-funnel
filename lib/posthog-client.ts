@@ -13,6 +13,16 @@ export function isPostHogConfigured(): boolean {
   return Boolean(POSTHOG_KEY);
 }
 
+/**
+ * Which homepage A/B arm sent this visitor, from the `utm_content=variant-a|b`
+ * the site stamps on every link into the funnel.
+ */
+function abVariantFromUrl(): "a" | "b" | null {
+  const content = new URLSearchParams(window.location.search).get("utm_content");
+  const match = content && /^variant-([ab])$/.exec(content);
+  return match ? (match[1] as "a" | "b") : null;
+}
+
 export function initPostHog(): void {
   if (initialized || typeof window === "undefined" || !POSTHOG_KEY) return;
   posthog.init(POSTHOG_KEY, {
@@ -20,6 +30,18 @@ export function initPostHog(): void {
     capture_pageview: false,
     person_profiles: "always",
   });
+
+  // Stamp the homepage A/B arm on every event for the rest of the session.
+  //
+  // Variant B's whole thesis is that the quiz is the better first step: its own
+  // copy says "book it straight from your report". That booking happens here,
+  // not on the homepage, so it never reaches the homepage's GA property, and
+  // the test was scoring B on a path B was not built to use. register() (not
+  // capture()) because the UTM only exists on the first URL, while the booking
+  // happens two pages later.
+  const variant = abVariantFromUrl();
+  if (variant) posthog.register({ ab_variant: variant });
+
   initialized = true;
 }
 
