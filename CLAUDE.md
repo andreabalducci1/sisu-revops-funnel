@@ -40,7 +40,8 @@ Full design spec: `docs/superpowers/specs/2026-08-07-revops-quiz-redesign-design
 | Resend | Sends that optional report copy | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` |
 | Cal.com | Booking (email prefilled) | `config.ts > booking` |
 | PostHog | Funnel analytics + `/admin` | `NEXT_PUBLIC_POSTHOG_KEY`, `POSTHOG_PERSONAL_API_KEY`, `POSTHOG_PROJECT_ID` |
-| Vercel + GitHub | Deploy | via MCP |
+| HubSpot | Pushes quiz completions into the outbound pipeline as signal-carrying contacts | `HUBSPOT_TOKEN` (optional; skipped when unset) |
+| Vercel + GitHub | Deploy, via `.github/workflows/deploy.yml` | repo secret `VERCEL_TOKEN` |
 
 Demo mode: missing keys degrade gracefully and a `DemoBanner` announces what is unwired. Check with `isAirtableConfigured()`, `isResendConfigured()`, `isPostHogConfigured()`, `isAnthropicConfigured()`.
 
@@ -48,7 +49,11 @@ Demo mode: missing keys degrade gracefully and a `DemoBanner` announces what is 
 
 1. `config.ts` is the source of truth. No hardcoded copy or color in components.
 2. **No em-dashes anywhere** (copy, code, or the generated report). Use commas, colons, parentheses, or a single hyphen.
-3. Language is **English**. Brand is **SiSu RevOps** (Warm Ivory bg, Deep Charcoal text, Muted Sage + Dusty Blue-Grey accents, DM Serif Display + DM Sans).
+3. Default language is **English**; `config.fr.ts` overlays French onto it.
+   Never hand-write a parallel locale config: scoring resolves answers by
+   question and option id, so a renamed id scores wrong silently instead of
+   failing. Add locales through `localize()` in `lib/translate.ts`.
+   Brand is **SiSu RevOps** (Warm Ivory bg, Deep Charcoal text, Muted Sage + Dusty Blue-Grey accents, DM Serif Display + DM Sans).
 4. Voice: problem-first, plain, radically candid. No fake testimonials or invented social proof. Avoid "supercharge", "unleash", "game-changer", "leverage", "synergy", "10x".
 5. The AI endpoint is public: recompute the score server-side, keep it idempotent per lead, cap tokens.
 6. Verify in the browser (demo mode first) after any change that renders.
@@ -58,3 +63,34 @@ Demo mode: missing keys degrade gracefully and a `DemoBanner` announces what is 
 - Full design spec: `docs/superpowers/specs/2026-08-07-revops-quiz-redesign-design.md`. Read it before changing the quiz, scoring, leak model, or report shape.
 - Preferred flow: build and verify in demo mode with no paid keys, check the browser, then wire live keys. Airtable, Resend, Anthropic, PostHog, Cal.com, Vercel and GitHub all already exist for this project.
 - Deploy target: `check.sisurevops.com`, live in production.
+
+## Deploying, and how to verify it
+
+Pushing to `main` deploys to production. It runs through
+`.github/workflows/deploy.yml` (Vercel CLI + `VERCEL_TOKEN`), **not** Vercel's
+native Git integration: the Vercel account signs in to GitHub as
+`andrea-balducci` and this repo is owned by `andreabalducci1`, so linking the
+repo fails with `repo_no_access`.
+
+That indirection changes how you check a deploy. The Vercel API shows **no new
+deployment for about 60 seconds** after a push, because the deployment is not
+created until the CLI step runs at the end of the workflow. An empty Vercel
+deployment list right after a push means "not yet", never "it failed".
+
+Check the workflow first, it is the authoritative source:
+
+```
+gh run list  --repo andreabalducci1/sisu-revops-funnel --limit 3
+gh run watch --repo andreabalducci1/sisu-revops-funnel <run-id>
+```
+
+Only then confirm on the Vercel side, and read `created` as a real date rather
+than assuming the newest row is recent:
+
+```
+curl -s -o /dev/null -w "%{http_code}\n" https://check.sisurevops.com
+```
+
+Bitten on 2026-08-26: a deployment list queried seconds after a push was read as
+proof that production was lagging a commit. The workflow had in fact succeeded
+in 1m11s and production was already current.
