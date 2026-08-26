@@ -9,6 +9,7 @@ import {
   type LeadFields,
 } from "@/lib/airtable";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { upsertQuizContact } from "@/lib/hubspot";
 import { scoreQuiz, type ScoreResult } from "@/lib/scoring";
 import config from "@/config";
 
@@ -48,6 +49,19 @@ export async function POST(req: NextRequest) {
 
     // Recompute the score server-side; never trust a client-sent number.
     const score = answers ? scoreQuiz(answers, config.quiz) : null;
+
+    // Push to HubSpot as a signal-carrying contact BEFORE the Airtable write,
+    // so a completed quiz reaches the outbound pipeline even if Airtable is
+    // unconfigured or failing. upsertQuizContact never throws; a HubSpot
+    // problem is logged and the lead still lands.
+    const hs = await upsertQuizContact({ email, firstName, company }, score);
+    if (hs.degraded) {
+      console.warn(
+        "[lead] hubspot: custom revops_* properties missing, wrote core signal fields only"
+      );
+    } else if (!hs.ok && !hs.skipped) {
+      console.error("[lead] hubspot:", hs.error);
+    }
 
     // Demo mode: no Airtable -> accept the lead anyway.
     if (!isAirtableConfigured()) {

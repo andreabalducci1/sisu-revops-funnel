@@ -3,7 +3,8 @@
 import { useState, useRef, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import config from "@/config";
+import enConfig from "@/config";
+import type { AppConfig } from "@/lib/translate";
 import { track } from "@/lib/posthog-client";
 import { FUNNEL_EVENTS } from "@/lib/events";
 import { scoreQuiz, type Answers } from "@/lib/scoring";
@@ -130,7 +131,11 @@ function buildNumbersPayload(form: NumbersForm): LeakInputs | undefined {
  * visitor reaches their full results without identifying themselves. Email
  * capture, when it happens at all, now lives on the results page.
  */
-export function MaturityQuiz() {
+/**
+ * `config` defaults to English, so every existing route renders exactly as it
+ * did before this prop existed. A localized route passes its own config in.
+ */
+export function MaturityQuiz({ config = enConfig }: { config?: AppConfig } = {}) {
   const { landing, quiz } = config;
   const router = useRouter();
 
