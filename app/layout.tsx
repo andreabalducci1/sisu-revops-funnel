@@ -32,6 +32,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
+      <head>
+        {/* Origami website visitors: company-level only, loaded through the
+            first-party /_ov proxy in middleware.ts. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "window.origami = window.origami || function () { (origami.q = origami.q || []).push(arguments) };",
+          }}
+        />
+        <script
+          async
+          src="/_ov/o.js"
+          data-key="og_pk_DURSIoR3t_KOshp_qlphQg"
+          data-endpoint="/_ov"
+        />
+      </head>
       <body
         style={
           {
