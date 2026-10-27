@@ -7,38 +7,9 @@ import { NextRequest, NextResponse } from "next/server";
  * /report is deliberately ungated. The diagnosis is the product now, and the
  * booking is the conversion. Gating it here would bounce every visitor,
  * because tunnel_optin is only set by the (now optional) email capture.
- *
- * Origami visitor proxy:
- *  - /_ov/{o.js,e,identify} forward to Origami with the visitor IP and the
- *    secret key attached server-side (company-level only, never the person).
- *  - Anything else under /_ov/ is a 404. Never forward /_ov/* wholesale:
- *    Origami's /v1/s accepts deletions and this proxy carries the secret key.
  */
-const ORIGAMI_ALLOWED = new Set(["o.js", "e", "identify"]);
-
-function origamiProxy(req: NextRequest) {
-  const path = req.nextUrl.pathname.slice("/_ov/".length);
-  if (!ORIGAMI_ALLOWED.has(path)) return new NextResponse(null, { status: 404 });
-
-  // Vercel's edge overwrites x-real-ip / x-forwarded-for, so the browser cannot spoof them.
-  const ip =
-    req.headers.get("x-real-ip") ??
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    "";
-  const has = (n: string) => `${n}=${(process.env[n] ?? "").length}`; const k = process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""; console.log(`[origami-key-check] ${path} ${["VERCEL_ENV", "ANTHROPIC_API_KEY", "POSTHOG_PERSONAL_API_KEY", "ORIGAMI_VISITORS_SECRET_KEY"].map(has).join(" ")} sk=${k.startsWith("og_sk_")}`); // TEMP
-  const headers = new Headers(req.headers);
-  headers.set("X-Origami-Client-IP", ip);
-  headers.set("Authorization", `Bearer ${process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""}`);
-  headers.delete("cookie");
-
-  const target = new URL("https://origami-web-visitors.com/v1/" + path + req.nextUrl.search);
-  return NextResponse.rewrite(target, { request: { headers } });
-}
-
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-
-  if (pathname.startsWith("/_ov/")) return origamiProxy(req);
 
   if (pathname.startsWith("/thanks")) {
     const booking = req.cookies.get("tunnel_booking");
@@ -51,5 +22,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/thanks/:path*", "/_ov/:path*"],
+  matcher: ["/thanks/:path*"],
 };
