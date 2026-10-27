@@ -25,6 +25,7 @@ function origamiProxy(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "";
+  console.log(`[origami-ip-check] ${path} ${ip}`); // TEMP: remove after install check
   const headers = new Headers(req.headers);
   headers.set("X-Origami-Client-IP", ip);
   headers.set("Authorization", `Bearer ${process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""}`);
