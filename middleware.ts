@@ -25,7 +25,7 @@ function origamiProxy(req: NextRequest) {
     req.headers.get("x-real-ip") ??
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "";
-  const k = process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""; console.log(`[origami-key-check] ${path} present=${k.length > 0} sk=${k.startsWith("og_sk_")} len=${k.length}`); // TEMP
+  const has = (n: string) => `${n}=${(process.env[n] ?? "").length}`; const k = process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""; console.log(`[origami-key-check] ${path} ${["VERCEL_ENV", "ANTHROPIC_API_KEY", "POSTHOG_PERSONAL_API_KEY", "ORIGAMI_VISITORS_SECRET_KEY"].map(has).join(" ")} sk=${k.startsWith("og_sk_")}`); // TEMP
   const headers = new Headers(req.headers);
   headers.set("X-Origami-Client-IP", ip);
   headers.set("Authorization", `Bearer ${process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""}`);
