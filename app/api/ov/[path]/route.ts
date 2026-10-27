@@ -28,6 +28,7 @@ async function proxy(req: Request, { params }: { params: Promise<{ path: string 
     const value = req.headers.get(name);
     if (value) headers.set(name, value);
   }
+  const k = process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""; console.log(`[origami-key-check] fn ${path} VERCEL_ENV=${process.env.VERCEL_ENV} ANTHROPIC=${(process.env.ANTHROPIC_API_KEY ?? "").length} ORIGAMI=${k.length} sk=${k.startsWith("og_sk_")}`); // TEMP
   headers.set("X-Origami-Client-IP", ip);
   headers.set("Authorization", `Bearer ${process.env.ORIGAMI_VISITORS_SECRET_KEY ?? ""}`);
 
